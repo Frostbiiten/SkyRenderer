@@ -10,6 +10,7 @@
 #include <sky/AssetMan.h>
 #include <sky/Debug.h>
 
+#define SPDLOG_FMT_EXTERNAL
 namespace sky
 {
 	namespace file
