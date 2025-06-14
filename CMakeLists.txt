@@ -11,6 +11,7 @@ include(cmake/FindFmt.cmake)
 include(cmake/FindSpdlog.cmake)
 include(cmake/FindPhysFS.cmake)
 include(cmake/FindRaylib.cmake)
+include(cmake/FindSIMDE.cmake)
 
 # Define PROJECT_SOURCES as a list of all source files (src)
 file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
@@ -30,7 +31,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE})
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib raylib_cpp) # raylib + wrapper
 target_link_libraries(${PROJECT_NAME} PRIVATE fmt spdlog) # fmt + spdlog
 target_link_libraries(${PROJECT_NAME} PRIVATE physfs-static) # physfs
-
+target_include_directories(${PROJECT_NAME} PRIVATE ${simde_SOURCE_DIR}) #simde
 
 if (APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework IOKit")

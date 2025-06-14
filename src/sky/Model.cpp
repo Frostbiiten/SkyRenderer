@@ -33,7 +33,6 @@ namespace sky
 
     void Model::load(std::string_view name)
     {
-        // TODO: load this properly
         smoothing = false;
 
         std::ifstream in{ name.data() };
@@ -73,12 +72,11 @@ namespace sky
                                              ? face_str
                                              : face_str.substr(0, next_space);
 
-                    if (!group.empty()) // ignore empty
+                    if (!group.empty())
                     {
                         fan_verts.emplace_back();
                         Vertex& vtx = fan_verts.back();
 
-                        // split v/vt/vn
                         for (int i = 0; i < 3 && !group.empty(); ++i)
                         {
                             std::size_t slash = group.find('/');
@@ -117,12 +115,12 @@ namespace sky
 
     const std::vector<Vector3>& Model::get_normals() const
     {
-        return vertices;
+        return normals;
     }
 
     const std::vector<Vector3>& Model::get_uvs() const
     {
-        return vertices;
+        return uvs;
     }
 
     const std::vector<Face> &Model::get_faces() const
@@ -133,5 +131,11 @@ namespace sky
     const Matrix &Model::get_transform() const
     {
         return transform;
+    }
+
+    Model &Model::set_transform(Matrix new_transform)
+    {
+        this->transform = new_transform;
+        return *this;
     }
 }

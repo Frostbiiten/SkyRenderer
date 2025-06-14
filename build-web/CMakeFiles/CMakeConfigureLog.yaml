@@ -1,0 +1,102 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/CMakeDetermineSystem.cmake:200 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      The target system is: Emscripten - 1 - x86
+      The host system is: Windows - 10.0.26100 - AMD64
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/CheckCXXCompilerFlag.cmake:34 (cmake_check_compiler_flag)"
+      - "build-web/_deps/fmt-src/CMakeLists.txt:237 (check_cxx_compiler_flag)"
+    checks:
+      - "Performing Test HAS_NULLPTR_WARNING"
+    directories:
+      source: "C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-q5dn4t"
+      binary: "C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-q5dn4t"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "C:/Users/Frost/Code/emsdk/upstream/emscripten/emscan-deps"
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "C:/Users/Frost/Code/emsdk/upstream/emscripten/cmake/Modules;C:/Users/Frost/Code/emsdk/upstream/emscripten/cmake/Modules;C:/Users/Frost/Code/emsdk/upstream/emscripten/cmake/Modules;C:/Users/Frost/Code/emsdk/upstream/emscripten/cmake/Modules;C:/Users/Frost/Code/emsdk/upstream/emscripten/cmake/Modules;C:/Users/Frost/Code/RaylibTest/build-web/_deps/fmt-src/support/cmake"
+    buildResult:
+      variable: "HAS_NULLPTR_WARNING"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-q5dn4t'
+        
+        Run Build Command(s): C:/PROGRA~1/CMake/bin/ninja.exe -v cmTC_f0e53
+        [1/2] C:\\Users\\Frost\\Code\\emsdk\\upstream\\emscripten\\em++.bat -DHAS_NULLPTR_WARNING  -std=gnu++20   -Wzero-as-null-pointer-constant -MD -MT CMakeFiles/cmTC_f0e53.dir/src.cxx.o -MF CMakeFiles\\cmTC_f0e53.dir\\src.cxx.o.d -o CMakeFiles/cmTC_f0e53.dir/src.cxx.o -c C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-q5dn4t/src.cxx
+        [2/2] C:\\WINDOWS\\system32\\cmd.exe /C "cd . && C:\\Users\\Frost\\Code\\emsdk\\upstream\\emscripten\\em++.bat   CMakeFiles/cmTC_f0e53.dir/src.cxx.o -o cmTC_f0e53.js   && cd ."
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/FindThreads.cmake:97 (CHECK_C_SOURCE_COMPILES)"
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "build-web/_deps/spdlog-src/CMakeLists.txt:144 (find_package)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-c2gt8s"
+      binary: "C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-c2gt8s"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "C:/Users/Frost/Code/emsdk/upstream/emscripten/emscan-deps"
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "C:/Users/Frost/Code/emsdk/upstream/emscripten/cmake/Modules;C:/Users/Frost/Code/emsdk/upstream/emscripten/cmake/Modules;C:/Users/Frost/Code/emsdk/upstream/emscripten/cmake/Modules;C:/Users/Frost/Code/emsdk/upstream/emscripten/cmake/Modules;C:/Users/Frost/Code/emsdk/upstream/emscripten/cmake/Modules"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-c2gt8s'
+        
+        Run Build Command(s): C:/PROGRA~1/CMake/bin/ninja.exe -v cmTC_5c6d1
+        [1/2] C:\\Users\\Frost\\Code\\emsdk\\upstream\\emscripten\\emcc.bat -DCMAKE_HAVE_LIBC_PTHREAD   -MD -MT CMakeFiles/cmTC_5c6d1.dir/src.c.o -MF CMakeFiles\\cmTC_5c6d1.dir\\src.c.o.d -o CMakeFiles/cmTC_5c6d1.dir/src.c.o -c C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-c2gt8s/src.c
+        [2/2] C:\\WINDOWS\\system32\\cmd.exe /C "cd . && C:\\Users\\Frost\\Code\\emsdk\\upstream\\emscripten\\emcc.bat   CMakeFiles/cmTC_5c6d1.dir/src.c.o -o cmTC_5c6d1.js   && cd ."
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "C:/Program Files/CMake/share/cmake-3.29/Modules/CheckCCompilerFlag.cmake:51 (cmake_check_compiler_flag)"
+      - "build-web/_deps/raylib-src/cmake/AddIfFlagCompiles.cmake:3 (CHECK_C_COMPILER_FLAG)"
+      - "build-web/_deps/raylib-src/cmake/CompilerFlags.cmake:5 (add_if_flag_compiles)"
+      - "build-web/_deps/raylib-src/CMakeLists.txt:29 (include)"
+    checks:
+      - "Performing Test COMPILER_HAS_THOSE_TOGGLES"
+    directories:
+      source: "C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-zkqt1s"
+      binary: "C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-zkqt1s"
+    cmakeVariables:
+      CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS: "C:/Users/Frost/Code/emsdk/upstream/emscripten/emscan-deps"
+      CMAKE_C_FLAGS: ""
+      CMAKE_C_FLAGS_DEBUG: "-g"
+      CMAKE_EXE_LINKER_FLAGS: ""
+      CMAKE_MODULE_PATH: "C:/Users/Frost/Code/RaylibTest/build-web/_deps/raylib-src/cmake"
+    buildResult:
+      variable: "COMPILER_HAS_THOSE_TOGGLES"
+      cached: true
+      stdout: |
+        Change Dir: 'C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-zkqt1s'
+        
+        Run Build Command(s): C:/PROGRA~1/CMake/bin/ninja.exe -v cmTC_3e335
+        [1/2] C:\\Users\\Frost\\Code\\emsdk\\upstream\\emscripten\\emcc.bat -DCOMPILER_HAS_THOSE_TOGGLES  -Werror=pointer-arith -MD -MT CMakeFiles/cmTC_3e335.dir/src.c.o -MF CMakeFiles\\cmTC_3e335.dir\\src.c.o.d -o CMakeFiles/cmTC_3e335.dir/src.c.o -c C:/Users/Frost/Code/RaylibTest/build-web/CMakeFiles/CMakeScratch/TryCompile-zkqt1s/src.c
+        [2/2] C:\\WINDOWS\\system32\\cmd.exe /C "cd . && C:\\Users\\Frost\\Code\\emsdk\\upstream\\emscripten\\emcc.bat   CMakeFiles/cmTC_3e335.dir/src.c.o -o cmTC_3e335.js   && cd ."
+        
+      exitCode: 0
+...

@@ -10,3 +10,7 @@ if (NOT fmt_FOUND)
     )
     FetchContent_MakeAvailable(fmt)
 endif()
+
+if (${PLATFORM} STREQUAL "Web")
+    set(FMT_OS OFF CACHE BOOL "Disable fmt::os to avoid Emscripten build issues" FORCE)
+endif()

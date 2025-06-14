@@ -47,6 +47,11 @@ namespace sky
 		int truncCount = truncInterval;
 		float lerpFps, lerpFpsTrunc;
 
+        void init()
+        {
+            startTime = std::chrono::high_resolution_clock::now();
+        }
+
 		void tick()
 		{
 			deltaTime = (std::chrono::high_resolution_clock::now() - prevFrameTime);
@@ -80,7 +85,10 @@ namespace sky
         sky::PixelBuff softwareRenderBuffer(render::pixelWidth, render::pixelHeight);
         Texture2D screenTexture;
 
-        sky::Model model("test_3.obj", MatrixTranslate(0.f, 0.f, -2.f));
+        //sky::Model model("test_3.obj", MatrixTranslate(0.f, 0.f, -2.f));
+        sky::Model model("test_smooth.obj", MatrixTranslate(0.f, 0.f, -2.f));
+        sky::Model ocean_model("ocean.obj", MatrixTranslate(0.f, 0.f, 0.f));
+        //sky::Model cube("cube.obj", MatrixTranslate(0.f, 0.f, 0.f));
         sky::Camera cam;
 
         void init()
@@ -159,6 +167,7 @@ namespace sky
         }
 
 
+        float time = 0;
 
         void draw()
 		{
@@ -167,11 +176,33 @@ namespace sky
             ClearBackground(raylib::Color::Black());
 
             {
-                softwareRenderBuffer.clear(0);
+                softwareRenderBuffer.clear();
+                std::chrono::duration<double> passed = (std::chrono::high_resolution_clock::now() - sky::time::startTime);
+                model.set_transform(MatrixTranslate(0.f, sin(passed.count() * 1.f), 2.f));
+
+                for (int z = 0; z < 1; ++z)
+                {
+                    for (int y = 0; y < 1; ++y)
+                    {
+                        for (int x = 0; x < 1; ++x)
+                        {
+                            model.set_transform(MatrixMultiply(
+                                                               MatrixRotateXYZ(
+                                                                Vector3Scale(
+                                                                        Vector3{1.f, 1.f, 1.f},
+                                                                        sin(passed.count() + x + y + z))), MatrixTranslate((x - 0) * 4, y * 4, z * -4)));
+
+                            //softwareRenderBuffer.draw_model(cam, model, sky::shade_rim);
+                            softwareRenderBuffer.draw_model(cam, model, sky::shade_half_lambert);
+                        }
+                    }
+                }
 
                 {
-                    softwareRenderBuffer.draw_model(cam, model);
+                    //softwareRenderBuffer.draw_model(cam, ocean_model);
+                    // softwareRenderBuffer.draw_model_multithreaded(cam, model);
                 }
+
 
                 // Update and draw tex
                 UpdateTexture(screenTexture, softwareRenderBuffer.framebuffer.data());
@@ -190,6 +221,7 @@ namespace sky
                     0.0f,
                     WHITE
             );
+            DrawText(std::to_string(sky::time::lerpFps).c_str(), 20, 20, 20, WHITE);
             EndDrawing();
 		}
 	}
@@ -200,6 +232,7 @@ namespace sky
 		dbg::init();
 		// in::init(); TODO: fix input
 		render::init();
+        time::init();
 
 
         while (!render::windowPtr->ShouldClose())

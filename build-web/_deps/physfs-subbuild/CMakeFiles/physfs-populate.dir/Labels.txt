@@ -1,0 +1,14 @@
+# Target labels
+ physfs-populate
+# Source files and their labels
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/CMakeFiles/physfs-populate
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/CMakeFiles/physfs-populate.rule
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/CMakeFiles/physfs-populate-complete.rule
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/physfs-populate-prefix/src/physfs-populate-stamp/physfs-populate-build.rule
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/physfs-populate-prefix/src/physfs-populate-stamp/physfs-populate-configure.rule
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/physfs-populate-prefix/src/physfs-populate-stamp/physfs-populate-download.rule
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/physfs-populate-prefix/src/physfs-populate-stamp/physfs-populate-install.rule
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/physfs-populate-prefix/src/physfs-populate-stamp/physfs-populate-mkdir.rule
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/physfs-populate-prefix/src/physfs-populate-stamp/physfs-populate-patch.rule
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/physfs-populate-prefix/src/physfs-populate-stamp/physfs-populate-test.rule
+C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-subbuild/physfs-populate-prefix/src/physfs-populate-stamp/physfs-populate-update.rule

@@ -36,5 +36,7 @@ namespace sky
         [[nodiscard]] const std::vector<Vector3>& get_uvs() const ;
         [[nodiscard]] const std::vector<Face> &get_faces() const;
         [[nodiscard]] const Matrix &get_transform() const;
+
+        Model &set_transform(Matrix transform);
     };
 }
