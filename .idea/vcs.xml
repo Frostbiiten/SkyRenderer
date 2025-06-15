@@ -2,18 +2,17 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/build-web/_deps/fmt-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/build-web/_deps/physfs-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/build-web/_deps/raylib-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/build-web/_deps/raylib_cpp-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/build-web/_deps/raylib_cpp-src/projects/Doxygen/doxygen-awesome-css" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/build-web/_deps/simde-src" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/build-web/_deps/spdlog-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/fmt-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/physfs-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/raylib-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/raylib_cpp-src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/raylib_cpp-src/projects/Doxygen/doxygen-awesome-css" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/simde-src" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/simde-src/test/munit" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/cmake-build-debug/_deps/spdlog-src" vcs="Git" />
   </component>
 </project>

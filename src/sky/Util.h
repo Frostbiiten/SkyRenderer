@@ -1,90 +1,129 @@
 #pragma once
-#include <SFML/System/Vector2.hpp>
+
+// std
 #include <numbers>
+#include <cstdint>
 #include <cmath>
+#include <array>
+
+// Raylib
+#include <raylib.h>
+
+// SIMD-E
+#define SIMDE_ENABLE_NATIVE_ALIASES
+#include <simde/x86/sse.h>
+#include <simde/x86/sse2.h>
+
+#ifndef SIMDE_MM_SHUFFLE
+#define SIMDE_MM_SHUFFLE(z, y, x, w) (((z) << 6) | ((y) << 4) | ((x) << 2) | (w))
+#endif
 
 namespace sky
 {
-	namespace util
-	{
-		constexpr float radToDeg = 180.f * std::numbers::inv_pi;
-		constexpr float degToRad = std::numbers::pi / 180.f;
+    namespace color
+    {
+        constexpr inline std::uint32_t pack(std::uint8_t r, std::uint8_t g, std::uint8_t b, std::uint8_t a = 0xFF)
+        {
+            return (a << 24) | (b << 16) | (g << 8) | r;
+        }
 
-		namespace vec
-		{
-			template <typename T>
-			inline sf::Vector2<T> lerp(const sf::Vector2<T>& a, const sf::Vector2<T>& b, float t)
-			{
-				return a + (b - a) * t;
-			}
+        inline std::array<float, 4> unpack(std::uint32_t color)
+        {
+            return std::array<float, 4>{
+                    (float)((color >> 24) & 0xFF),
+                    (float)((color >> 16) & 0xFF),
+                    (float)((color >> 8) & 0xFF),
+                    (float)(color & 0xFF)
+            };
+        }
 
-			template <typename T>
-			inline float sqrMagnitude(const sf::Vector2<T>& vector)
-			{
-				return (vector.x * vector.x) + (vector.y * vector.y);
-			}
+        inline Vector4 unpack_vec4(std::uint32_t color)
+        {
+            return Vector4 {
+                    (float)((color >> 24) & 0xFF),
+                    (float)((color >> 16) & 0xFF),
+                    (float)((color >> 8) & 0xFF),
+                    (float)(color & 0xFF)
+            };
+        }
 
-			template <typename T>
-			inline float magnitude(const sf::Vector2<T>& vector)
-			{
-				return std::sqrtf(sqrMagnitude);
-			}
+        inline Vector3 unpack_vec3(std::uint32_t color)
+        {
+            return Vector3 {
+                    (float)((color >> 16) & 0xFF),
+                    (float)((color >> 8) & 0xFF),
+                    (float)(color & 0xFF)
+            };
+        }
+    }
 
-			inline float angle(float x, float y)
-			{
-				return atan2(x, y) * util::radToDeg;
-			}
+    // SIMD optimized Vector normalization
+    inline Vector3 Vector3NormalizeFast(const Vector3& v)
+    {
+        simde__m128 vec = simde_mm_set_ps(0.0f, v.z, v.y, v.x);
+        simde__m128 dot = simde_mm_mul_ps(vec, vec);
+        dot = simde_mm_add_ps(dot, simde_mm_shuffle_ps(dot, dot, 0x4E)); // z,y swap
+        dot = simde_mm_add_ps(dot, simde_mm_shuffle_ps(dot, dot, 0xB1)); // x,?
+        simde__m128 invLen = simde_mm_rsqrt_ps(dot);
+        simde__m128 norm = simde_mm_mul_ps(vec, invLen);
 
-			inline float angle(const sf::Vector2f& vector)
-			{
-				return atan2(vector.x, vector.y) * util::radToDeg;
-			}
+        return {
+                simde_mm_cvtss_f32(norm),
+                simde_mm_cvtss_f32(simde_mm_shuffle_ps(norm, norm, 0x55)),
+                simde_mm_cvtss_f32(simde_mm_shuffle_ps(norm, norm, 0xAA))
+        };
+    }
 
-			// from https://forum.unity.com/threads/whats-the-best-way-to-rotate-a-vector2-in-unity.729605/
-			inline sf::Vector2f rotate(float x, float y, float delta)
-			{
-				return sf::Vector2f
-				(
-					x * std::cosf(delta) - y * std::sinf(delta),
-					x * std::sinf(delta) + y * std::cosf(delta)
-				);
-			}
+    inline float dot4(simde__m128 a, simde__m128 b)
+    {
+        simde__m128 mul = simde_mm_mul_ps(a, b);
+        simde__m128 shuf1 = simde_mm_shuffle_ps(mul, mul, SIMDE_MM_SHUFFLE(2, 3, 0, 1));
+        simde__m128 sum1 = simde_mm_add_ps(mul, shuf1);
+        simde__m128 shuf2 = simde_mm_shuffle_ps(sum1, sum1, SIMDE_MM_SHUFFLE(1, 0, 3, 2));
+        simde__m128 sum2 = simde_mm_add_ps(sum1, shuf2);
+        return simde_mm_cvtss_f32(sum2);
+    }
 
-		}
+    inline Vector4 Vector4Transform(const Vector4& v, const Matrix& m)
+    {
+        simde__m128 vec = simde_mm_set_ps(v.w, v.z, v.y, v.x); // reversed order
 
-		namespace f
-		{
-			inline float sign(float f) { return f >= 0.f ? 1.f : -1.f ; }
-			inline float moveTowards(float current, float target, float maxDelta)
-			{
-				if (std::fabsf(target - current) <= maxDelta) return target;
-				return current + sign(target - current) * maxDelta;
-			}
+        simde__m128 row0 = simde_mm_set_ps(m.m12, m.m8, m.m4, m.m0);
+        simde__m128 row1 = simde_mm_set_ps(m.m13, m.m9, m.m5, m.m1);
+        simde__m128 row2 = simde_mm_set_ps(m.m14, m.m10, m.m6, m.m2);
+        simde__m128 row3 = simde_mm_set_ps(m.m15, m.m11, m.m7, m.m3);
 
-		}
+        float x = dot4(row0, vec);
+        float y = dot4(row1, vec);
+        float z = dot4(row2, vec);
+        float w = dot4(row3, vec);
 
-		namespace col
-		{
-			// https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection
-			// positions are based on center, not top-left
-			inline bool collide(float circX, float circY, float circRad, float rectX, float rectY, float rectW, float rectH)
-			{
-				float circleDistX = abs(circX - rectX);
-				float circleDistY = abs(circY - rectY);
+        return { x, y, z, w };
+    }
 
-				if (circleDistX > (rectW / 2 + circRad)) return false;
-				if (circleDistY > (rectH / 2 + circRad)) return false;
+    inline bool Vector3NearEqual(const Vector3& a, const Vector3& b, float eps)
+    {
+        return std::abs(a.x - b.x) < eps &&
+               std::abs(a.y - b.y) < eps &&
+               std::abs(a.z - b.z) < eps;
+    }
 
-				if (circleDistX <= (rectW / 2)) return true;
-				if (circleDistY <= (rectH / 2)) return true; 
+    inline float fast_clamp(float v, float min, float max)
+    {
+        return std::min(max, std::max(min, v));
+    }
 
-				float distX = (circleDistX - rectW / 2);
-				float distY = (circleDistY - rectH / 2);
-				float cornerDist_sq = distX * distX + distY * distY;
+    // [0, 1] mapped to [0, 2^24-1]
+    inline constexpr uint32_t DEPTH_SCALE = (1 << 24) - 1;
+    inline uint32_t float_to_fixed_depth(float z)
+    {
+        // z = fast_clamp(z, 0.0f, 1.0f); not really necessary...
+        return static_cast<uint32_t>(z * DEPTH_SCALE);
+    }
 
-				return (cornerDist_sq <= (circRad * circRad));
-			}
-		}
-	}
+    inline float fixed_to_float_depth(uint32_t d)
+    {
+        return float(d) / float(DEPTH_SCALE);
+    }
 }
 

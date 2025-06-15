@@ -1,43 +1,57 @@
-#include "Model.h"
-#include "fmt/core.h"
+// STD
 #include <fstream>
 #include <cassert>
 #include <charconv>
 
-bool parse_floats(std::string_view str, std::initializer_list<float*> outputs) {
-    auto skip_ws = [](std::string_view& sv) {
-        while (!sv.empty() && std::isspace(static_cast<unsigned char>(sv.front()))) sv.remove_prefix(1);
+// SKY
+#include <sky/Model.h>
+
+bool parse_floats(std::string_view str, std::initializer_list<float*> outputs)
+{
+    auto skip_ws = [](std::string_view& sv)
+    {
+        while (!sv.empty() && std::isspace(static_cast<unsigned char>(sv.front())))
+            sv.remove_prefix(1);
     };
 
     for (float* out : outputs)
     {
         skip_ws(str);
 
-        auto begin = str.data();
-        float val;
-        auto [ptr, ec] = std::from_chars(begin, str.end(), val);
-        if (ec != std::errc()) return false;
+        const char* begin = str.data();
+        char* end = nullptr;
+
+        errno = 0;
+        float val = std::strtof(begin, &end);
+
+        if (end == begin || errno == ERANGE)
+            return false;
 
         *out = val;
-        str.remove_prefix(ptr - begin);
+
+        std::size_t consumed = static_cast<std::size_t>(end - begin);
+        if (consumed > str.size()) return false;
+        str.remove_prefix(consumed);
     }
 
     return true;
 }
 
+
 namespace sky
 {
-    Model::Model(std::string_view name, Matrix transform) : transform(transform) {
+    Model::Model(std::string_view name, Matrix transform) : transform(transform)
+    {
         load(name);
+
+        // this isn't actually used right now...
+        smoothing = false;
     }
 
     void Model::load(std::string_view name)
     {
-        smoothing = false;
-
         std::ifstream in{ name.data() };
-        if (!in)
-            throw std::runtime_error("Could not open OBJ file: " + std::string{name});
+        if (!in) throw std::runtime_error("Could not open OBJ file: " + std::string{name});
 
         std::string line;
         while (std::getline(in, line))

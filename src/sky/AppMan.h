@@ -4,10 +4,9 @@ namespace sky
 {
 	namespace render
 	{
-		constexpr int pixelWidth = 1280;
-		constexpr int pixelHeight = 720;
-		constexpr int scaleFactor = 1;
-		constexpr int aaLevel = 0; // set to 8x or 16x for aa
+		constexpr int pixelWidth = 640;
+		constexpr int pixelHeight = 360;
+		constexpr int scaleFactor = 2;
 	}
 
 	void init();

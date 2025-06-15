@@ -28,8 +28,8 @@ BUILD_SHARED_LIBS:BOOL=OFF
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=C:/msys64/mingw64/bin/llvm-addr2line.exe
 
-//Choose Release or Debug
-CMAKE_BUILD_TYPE:STRING=Release
+//Choose the type of build.
+CMAKE_BUILD_TYPE:STRING=
 
 //No help, variable specified on the command line.
 CMAKE_CROSSCOMPILING_EMULATOR:UNINITIALIZED=C:/Users/Frost/Code/emsdk/node/22.16.0_64bit/bin/node.exe
@@ -184,13 +184,13 @@ CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 CMAKE_PROJECT_NAME:STATIC=RaylibTest
 
 //Value Computed by CMake
-CMAKE_PROJECT_VERSION:STATIC=1.14.1
+CMAKE_PROJECT_VERSION:STATIC=5.0.1
 
 //Value Computed by CMake
-CMAKE_PROJECT_VERSION_MAJOR:STATIC=1
+CMAKE_PROJECT_VERSION_MAJOR:STATIC=5
 
 //Value Computed by CMake
-CMAKE_PROJECT_VERSION_MINOR:STATIC=14
+CMAKE_PROJECT_VERSION_MINOR:STATIC=0
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION_PATCH:STATIC=1
@@ -225,8 +225,8 @@ CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 // but are added when building.
 CMAKE_SKIP_INSTALL_RPATH:BOOL=NO
 
-//Skip RPATH
-CMAKE_SKIP_RPATH:BOOL=ON
+//If set, runtime paths are not added when using shared libraries.
+CMAKE_SKIP_RPATH:BOOL=NO
 
 //Flags used by the linker during the creation of static libraries
 // during all build types.
@@ -312,14 +312,6 @@ FETCHCONTENT_FULLY_DISCONNECTED:BOOL=OFF
 FETCHCONTENT_QUIET:BOOL=ON
 
 //When not empty, overrides where to find pre-populated content
-// for fmt
-FETCHCONTENT_SOURCE_DIR_FMT:PATH=
-
-//When not empty, overrides where to find pre-populated content
-// for PhysFS
-FETCHCONTENT_SOURCE_DIR_PHYSFS:PATH=
-
-//When not empty, overrides where to find pre-populated content
 // for raylib
 FETCHCONTENT_SOURCE_DIR_RAYLIB:PATH=
 
@@ -331,18 +323,8 @@ FETCHCONTENT_SOURCE_DIR_RAYLIB_CPP:PATH=
 // for simde
 FETCHCONTENT_SOURCE_DIR_SIMDE:PATH=
 
-//When not empty, overrides where to find pre-populated content
-// for spdlog
-FETCHCONTENT_SOURCE_DIR_SPDLOG:PATH=
-
 //Enables UPDATE_DISCONNECTED behavior for all content population
 FETCHCONTENT_UPDATES_DISCONNECTED:BOOL=OFF
-
-//Enables UPDATE_DISCONNECTED behavior just for population of fmt
-FETCHCONTENT_UPDATES_DISCONNECTED_FMT:BOOL=OFF
-
-//Enables UPDATE_DISCONNECTED behavior just for population of PhysFS
-FETCHCONTENT_UPDATES_DISCONNECTED_PHYSFS:BOOL=OFF
 
 //Enables UPDATE_DISCONNECTED behavior just for population of raylib
 FETCHCONTENT_UPDATES_DISCONNECTED_RAYLIB:BOOL=OFF
@@ -352,71 +334,6 @@ FETCHCONTENT_UPDATES_DISCONNECTED_RAYLIB_CPP:BOOL=OFF
 
 //Enables UPDATE_DISCONNECTED behavior just for population of simde
 FETCHCONTENT_UPDATES_DISCONNECTED_SIMDE:BOOL=OFF
-
-//Enables UPDATE_DISCONNECTED behavior just for population of spdlog
-FETCHCONTENT_UPDATES_DISCONNECTED_SPDLOG:BOOL=OFF
-
-//Value Computed by CMake
-FMT_BINARY_DIR:STATIC=C:/Users/Frost/Code/RaylibTest/build-web/_deps/fmt-build
-
-//Installation directory for cmake files, a relative path that
-// will be joined with C:/Users/Frost/Code/emsdk/upstream/emscripten/cache/sysroot
-// or an absolute path.
-FMT_CMAKE_DIR:STRING=lib/cmake/fmt
-
-//Generate the cuda-test target.
-FMT_CUDA_TEST:BOOL=OFF
-
-//Debug library postfix.
-FMT_DEBUG_POSTFIX:STRING=d
-
-//Generate the doc target.
-FMT_DOC:BOOL=OFF
-
-//Generate the fuzz target.
-FMT_FUZZ:BOOL=OFF
-
-//Installation directory for include files, a relative path that
-// will be joined with C:/Users/Frost/Code/emsdk/upstream/emscripten/cache/sysroot
-// or an absolute path.
-FMT_INC_DIR:STRING=include
-
-//Generate the install target.
-FMT_INSTALL:BOOL=ON
-
-//Value Computed by CMake
-FMT_IS_TOP_LEVEL:STATIC=OFF
-
-//Installation directory for libraries, a relative path that will
-// be joined to C:/Users/Frost/Code/emsdk/upstream/emscripten/cache/sysroot
-// or an absolute path.
-FMT_LIB_DIR:STRING=lib
-
-//Build a module instead of a traditional library.
-FMT_MODULE:BOOL=OFF
-
-//Disable fmt::os to avoid Emscripten build issues
-FMT_OS:BOOL=OFF
-
-//Enable extra warnings and expensive tests.
-FMT_PEDANTIC:BOOL=OFF
-
-//Installation directory for pkgconfig (.pc) files, a relative
-// path that will be joined with C:/Users/Frost/Code/emsdk/upstream/emscripten/cache/sysroot
-// or an absolute path.
-FMT_PKGCONFIG_DIR:STRING=lib/pkgconfig
-
-//Value Computed by CMake
-FMT_SOURCE_DIR:STATIC=C:/Users/Frost/Code/RaylibTest/build-web/_deps/fmt-src
-
-//Expose headers with marking them as system.
-FMT_SYSTEM_HEADERS:BOOL=OFF
-
-//Generate the test target.
-FMT_TEST:BOOL=OFF
-
-//Halt the compilation with an error on compiler warnings.
-FMT_WERROR:BOOL=OFF
 
 //Git command line client
 GIT_EXECUTABLE:FILEPATH=C:/Program Files/Git/cmd/git.exe
@@ -430,77 +347,8 @@ MACOS_FATLIB:BOOL=OFF
 //Force a specific OpenGL Version?
 OPENGL_VERSION:STRING=OFF
 
-//Enable 7zip support
-PHYSFS_ARCHIVE_7Z:BOOL=ON
-
-//Enable Build Engine GRP support
-PHYSFS_ARCHIVE_GRP:BOOL=ON
-
-//Enable Descent I/II HOG support
-PHYSFS_ARCHIVE_HOG:BOOL=ON
-
-//Enable ISO9660 support
-PHYSFS_ARCHIVE_ISO9660:BOOL=ON
-
-//Enable Descent I/II MVL support
-PHYSFS_ARCHIVE_MVL:BOOL=ON
-
-//Enable Quake I/II QPAK support
-PHYSFS_ARCHIVE_QPAK:BOOL=ON
-
-//Enable I-War / Independence War SLB support
-PHYSFS_ARCHIVE_SLB:BOOL=ON
-
-//Enable Gothic I/II VDF archive support
-PHYSFS_ARCHIVE_VDF:BOOL=ON
-
-//Enable Doom WAD support
-PHYSFS_ARCHIVE_WAD:BOOL=ON
-
-//Enable ZIP support
-PHYSFS_ARCHIVE_ZIP:BOOL=ON
-
-//Build doxygen based documentation
-PHYSFS_BUILD_DOCS:BOOL=OFF
-
-//Build shared library
-PHYSFS_BUILD_SHARED:BOOL=OFF
-
-//Build static library
-PHYSFS_BUILD_STATIC:BOOL=ON
-
-//Build stdio test program.
-PHYSFS_BUILD_TEST:BOOL=OFF
-
-//Disable installing PhysFS
-PHYSFS_DISABLE_INSTALL:BOOL=OFF
-
-//Path to a file.
-PHYSFS_INCLUDE_DIR:PATH=PHYSFS_INCLUDE_DIR-NOTFOUND
-
-//Path to a library.
-PHYSFS_LIBRARY:FILEPATH=PHYSFS_LIBRARY-NOTFOUND
-
-//Name of 'dist' build target
-PHYSFS_TARGETNAME_DIST:STRING=dist
-
-//Name of 'uninstall' build target
-PHYSFS_TARGETNAME_UNINSTALL:STRING=uninstall
-
 //Platform to build for.
 PLATFORM:STRING=Web
-
-//Path to a library.
-PTHREAD_LIBRARY:FILEPATH=PTHREAD_LIBRARY-NOTFOUND
-
-//Value Computed by CMake
-PhysicsFS_BINARY_DIR:STATIC=C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-build
-
-//Value Computed by CMake
-PhysicsFS_IS_TOP_LEVEL:STATIC=OFF
-
-//Value Computed by CMake
-PhysicsFS_SOURCE_DIR:STATIC=C:/Users/Frost/Code/RaylibTest/build-web/_deps/physfs-src
 
 //Value Computed by CMake
 RaylibTest_BINARY_DIR:STATIC=C:/Users/Frost/Code/RaylibTest/build-web
@@ -511,93 +359,6 @@ RaylibTest_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 RaylibTest_SOURCE_DIR:STATIC=C:/Users/Frost/Code/RaylibTest
 
-//Build all artifacts
-SPDLOG_BUILD_ALL:BOOL=OFF
-
-//Build benchmarks (Requires https://github.com/google/benchmark.git
-// to be installed)
-SPDLOG_BUILD_BENCH:BOOL=OFF
-
-//Build example
-SPDLOG_BUILD_EXAMPLE:BOOL=OFF
-
-SPDLOG_BUILD_EXAMPLES:BOOL=OFF
-
-//Build header only example
-SPDLOG_BUILD_EXAMPLE_HO:BOOL=OFF
-
-//Build position independent code (-fPIC)
-SPDLOG_BUILD_PIC:BOOL=OFF
-
-//Build shared library
-SPDLOG_BUILD_SHARED:BOOL=OFF
-
-//Build tests
-SPDLOG_BUILD_TESTS:BOOL=OFF
-
-//Build tests using the header only version
-SPDLOG_BUILD_TESTS_HO:BOOL=OFF
-
-//Enable compiler warnings
-SPDLOG_BUILD_WARNINGS:BOOL=OFF
-
-//non supported option
-SPDLOG_CLOCK_COARSE:BOOL=OFF
-
-//Disable default logger creation
-SPDLOG_DISABLE_DEFAULT_LOGGER:BOOL=OFF
-
-//Build static or shared library using precompiled header to speed
-// up compilation time
-SPDLOG_ENABLE_PCH:BOOL=OFF
-
-//Disable syslog for wasm
-SPDLOG_ENABLE_SYSLOG:BOOL=OFF
-
-//Use external fmt library instead of bundled
-SPDLOG_FMT_EXTERNAL:BOOL=OFF
-
-//Use external fmt header-only library instead of bundled
-SPDLOG_FMT_EXTERNAL_HO:BOOL=OFF
-
-//Generate the install target
-SPDLOG_INSTALL:BOOL=OFF
-
-//prevent spdlog from using of std::atomic log levels (use only
-// if your code never modifies log levels concurrently
-SPDLOG_NO_ATOMIC_LEVELS:BOOL=OFF
-
-//Compile with -fno-exceptions. Call abort() on any spdlog exceptions
-SPDLOG_NO_EXCEPTIONS:BOOL=OFF
-
-//prevent spdlog from querying the thread id on each log call if
-// thread id is not needed
-SPDLOG_NO_THREAD_ID:BOOL=OFF
-
-//prevent spdlog from using thread local storage
-SPDLOG_NO_TLS:BOOL=OFF
-
-//Prevent from child processes to inherit log file descriptors
-SPDLOG_PREVENT_CHILD_FD:BOOL=OFF
-
-//Enable address sanitizer in tests
-SPDLOG_SANITIZE_ADDRESS:BOOL=OFF
-
-//Include as system headers (skip for clang-tidy).
-SPDLOG_SYSTEM_INCLUDES:BOOL=OFF
-
-//run clang-tidy
-SPDLOG_TIDY:BOOL=OFF
-
-//Use std::format instead of fmt library.
-SPDLOG_USE_STD_FORMAT:BOOL=OFF
-
-//non supported option
-SPDLOG_WCHAR_FILENAMES:BOOL=OFF
-
-//non supported option
-SPDLOG_WCHAR_SUPPORT:BOOL=OFF
-
 //Link raylib against system GLFW instead of embedded one
 USE_EXTERNAL_GLFW:STRING=OFF
 
@@ -606,9 +367,6 @@ USE_WAYLAND:BOOL=OFF
 
 //Compile static library as position-independent code
 WITH_PIC:BOOL=OFF
-
-//The directory containing a CMake configuration file for fmt.
-fmt_DIR:PATH=fmt_DIR-NOTFOUND
 
 //Value Computed by CMake
 raylib_BINARY_DIR:STATIC=C:/Users/Frost/Code/RaylibTest/build-web/_deps/raylib-build/raylib
@@ -637,18 +395,6 @@ raylib_cpp_IS_TOP_LEVEL:STATIC=OFF
 //Value Computed by CMake
 raylib_cpp_SOURCE_DIR:STATIC=C:/Users/Frost/Code/RaylibTest/build-web/_deps/raylib_cpp-src
 
-//Value Computed by CMake
-spdlog_BINARY_DIR:STATIC=C:/Users/Frost/Code/RaylibTest/build-web/_deps/spdlog-build
-
-//The directory containing a CMake configuration file for spdlog.
-spdlog_DIR:PATH=spdlog_DIR-NOTFOUND
-
-//Value Computed by CMake
-spdlog_IS_TOP_LEVEL:STATIC=OFF
-
-//Value Computed by CMake
-spdlog_SOURCE_DIR:STATIC=C:/Users/Frost/Code/RaylibTest/build-web/_deps/spdlog-src
-
 
 ########################
 # INTERNAL cache entries
@@ -656,6 +402,8 @@ spdlog_SOURCE_DIR:STATIC=C:/Users/Frost/Code/RaylibTest/build-web/_deps/spdlog-s
 
 //ADVANCED property for variable: CMAKE_ADDR2LINE
 CMAKE_ADDR2LINE-ADVANCED:INTERNAL=1
+//STRINGS property for variable: CMAKE_BUILD_TYPE
+CMAKE_BUILD_TYPE-STRINGS:INTERNAL=Debug;Release;MinSizeRel;RelWithDebInfo
 //This is the directory where this CMakeCache.txt was created
 CMAKE_CACHEFILE_DIR:INTERNAL=c:/Users/Frost/Code/RaylibTest/build-web
 //Major version of cmake used to create the current loaded cache
@@ -718,8 +466,6 @@ CMAKE_GENERATOR_INSTANCE:INTERNAL=
 CMAKE_GENERATOR_PLATFORM:INTERNAL=
 //Name of generator toolset.
 CMAKE_GENERATOR_TOOLSET:INTERNAL=
-//Test CMAKE_HAVE_LIBC_PTHREAD
-CMAKE_HAVE_LIBC_PTHREAD:INTERNAL=1
 //Source directory with the top level CMakeLists.txt file for this
 // project
 CMAKE_HOME_DIRECTORY:INTERNAL=C:/Users/Frost/Code/RaylibTest
@@ -770,7 +516,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELEASE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO
 CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=5
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -827,19 +573,13 @@ CPACK_SOURCE_TZ-ADVANCED:INTERNAL=1
 CPACK_SOURCE_ZIP-ADVANCED:INTERNAL=1
 //If true, we are targeting Emscripten output.
 EMSCRIPTEN:INTERNAL=1
-//Details about finding Threads
-FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //ADVANCED property for variable: GIT_EXECUTABLE
 GIT_EXECUTABLE-ADVANCED:INTERNAL=1
-//Test HAS_NULLPTR_WARNING
-HAS_NULLPTR_WARNING:INTERNAL=1
 //Replace any OFF by default with ${OFF} to have it covered by
 // this option
 OFF:INTERNAL=OFF
 //STRINGS property for variable: OPENGL_VERSION
 OPENGL_VERSION-STRINGS:INTERNAL=OFF;4.3;3.3;2.1;1.1;ES 2.0;ES 3.0
-//ADVANCED property for variable: PHYSFS_BUILD_TEST
-PHYSFS_BUILD_TEST-ADVANCED:INTERNAL=1
 //STRINGS property for variable: PLATFORM
 PLATFORM-STRINGS:INTERNAL=Desktop;Web;Android;Raspberry Pi;DRM
 //STRINGS property for variable: USE_EXTERNAL_GLFW

@@ -1,16 +1,20 @@
 #pragma once
+
+// STD
 #include <vector>
-#include <raylib.h>
 #include <string_view>
 #include <array>
+
+// RAYLIB
+#include <raylib.h>
 
 namespace sky
 {
     struct Vertex
-    {
-        std::size_t v;  // vertex index
-        std::size_t vt; // tex coord index
-        std::size_t vn; // normal index
+    {   // indexes of ...
+        std::size_t v;  // vertex
+        std::size_t vt; // tex coord
+        std::size_t vn; // normal
     };
 
     struct Face

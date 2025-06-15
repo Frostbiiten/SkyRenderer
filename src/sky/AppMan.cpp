@@ -1,30 +1,19 @@
-// std
-#include <stack>
+// STD
 #include <chrono>
 
-// SFML
-// #include <SFML/Graphics.hpp>
+// RAYLIB
 #include <raylib.h>
 #include <raylib-cpp.hpp>
 
 // SKY
 #include <sky/AppMan.h>
-#include <sky/Debug.h>
-// #include <sky/Input.h>
-// #include <sky/Tilemap.h>
-// #include <sky/Camera.h>
 #include <sky/Model.h>
 #include <sky/PixelBuff.h>
-
-// imgui
-// #include <imgui.h>
-// #include <imgui-SFML.h>
-
-// FLECS
-// #include <flecs.h>
+#include <sky/Camera.h>
 
 namespace sky
 {
+    // leftovers from more complex timer... will keep for the time-being
 	namespace time
 	{
         namespace
@@ -34,7 +23,7 @@ namespace sky
             std::chrono::duration<double> deltaTime;
         }
 
-		int frameSamples = 30;
+		int frameSamples = 5;
 		int samplesRemaining = frameSamples;
 		float sampleTime;
 
@@ -78,24 +67,79 @@ namespace sky
 		}
 	}
 
+    // Camera
+    namespace scene
+    {
+        sky::Camera cam;
+        constexpr float MOVE_SPEED = 3.0f;
+        constexpr float LOOK_SPEED = 0.15f;
+        float pitch = 0;
+        float yaw = 0;
+
+        int id = 0;
+        std::array<std::string, 6> names
+                {
+                        "rim-lighting",
+                        "high-poly",
+                        "gouraud shading",
+                        "smooth shading (expensive)",
+                        "flat shading",
+                };
+    }
+
+    namespace input
+    {
+        void handle(float dt)
+        {
+            Vector3 localMove = { 0, 0, 0 };
+
+            if (IsKeyPressed(KEY_ENTER))
+            {
+                scene::id = (scene::id + 1) % scene::names.size();
+            }
+
+            if (IsKeyDown(KEY_W)) localMove.z -= 1.0f;
+            if (IsKeyDown(KEY_S)) localMove.z += 1.0f;
+            if (IsKeyDown(KEY_A)) localMove.x -= 1.0f;
+            if (IsKeyDown(KEY_D)) localMove.x += 1.0f;
+            if (IsKeyDown(KEY_SPACE))  localMove.y += 1.0f;
+            if (IsKeyDown(KEY_LEFT_SHIFT)) localMove.y -= 1.0f;
+
+            if (Vector3LengthSqr(localMove) != 0.0f)
+            {
+                Vector3 worldMove = Vector3RotateByQuaternion(Vector3Normalize(localMove), scene::cam.rotation);
+                scene::cam.position = Vector3Add(scene::cam.position, Vector3Scale(worldMove, scene::MOVE_SPEED * dt));
+            }
+
+            if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
+            {
+                Vector2 md = GetMouseDelta();
+                scene::yaw   += -md.x * scene::LOOK_SPEED;
+                scene::pitch += -md.y * scene::LOOK_SPEED;
+
+                // prevent flipping upside down
+                scene::pitch = Clamp(scene::pitch, -89.9f, 89.9f);
+
+                Quaternion qPitch = QuaternionFromEuler(scene::pitch * DEG2RAD, 0, 0);
+                Quaternion qYaw   = QuaternionFromEuler(0, scene::yaw * DEG2RAD, 0);
+
+                scene::cam.rotation = QuaternionNormalize(QuaternionMultiply(qYaw, qPitch));
+            }
+        }
+    }
+
 	namespace render
 	{
 		std::unique_ptr<raylib::Window> windowPtr;
         std::unique_ptr<raylib::RenderTexture2D> bufferPtr;
         sky::PixelBuff softwareRenderBuffer(render::pixelWidth, render::pixelHeight);
         Texture2D screenTexture;
-
-        //sky::Model model("test_3.obj", MatrixTranslate(0.f, 0.f, -2.f));
-        sky::Model model("test_smooth.obj", MatrixTranslate(0.f, 0.f, -2.f));
-        sky::Model ocean_model("ocean.obj", MatrixTranslate(0.f, 0.f, 0.f));
-        //sky::Model cube("cube.obj", MatrixTranslate(0.f, 0.f, 0.f));
-        sky::Camera cam;
+        Font main_font;
 
         void init()
 		{
 			windowPtr = std::make_unique<raylib::Window>(pixelWidth * scaleFactor, pixelHeight * scaleFactor, "Sky", FLAG_WINDOW_ALWAYS_RUN);
             bufferPtr = std::make_unique<raylib::RenderTexture2D>(pixelWidth, pixelHeight);
-			//windowPtr->setView(windowView);
 
             screenTexture = LoadTextureFromImage(
                     Image{
@@ -107,67 +151,19 @@ namespace sky
                     }
             );
 
-			// Init imgui
-            /*
-			ImGui::SFML::Init(*windowPtr);
-			ImGuiIO& ImGuiIO = ImGui::GetIO();
-			ImGuiIO.FontDefault = ImGuiIO.Fonts->AddFontFromFileTTF("common/font/IBMPlexMono-Regular.ttf", 20.f);
-			ImGui::SFML::UpdateFontTexture();
-			misc::skinImGui();
-            */
-
-			// RenderTexture Buffer + Sprite
-            /*
-			sf::ContextSettings settings;
-			settings.antialiasingLevel = render::aaLevel;
-			bufferPtr = std::make_unique<sf::RenderTexture>();
-			bufferPtr->create(pixelWidth, pixelHeight, settings);
-            */
-
-			//bufferSprite = sf::Sprite(bufferPtr->getTexture()); // <- stable ref to renderTexture result buffer
-			//bufferSprite.setOrigin(pixelWidth / 2.f, pixelHeight / 2.f);
-
+            main_font = LoadFontEx("assets/SpaceMono.ttf", 25, 0, 0);
 		}
-        constexpr float MOVE_SPEED = 3.0f;
-        constexpr float LOOK_SPEED = 0.15f;
-        float pitch = 0;
-        float yaw = 0;
-
-        void handle_input(float dt)
-        {
-            Vector3 localMove = { 0, 0, 0 };
-
-            if (IsKeyDown(KEY_W)) localMove.z -= 1.0f;
-            if (IsKeyDown(KEY_S)) localMove.z += 1.0f;
-            if (IsKeyDown(KEY_A)) localMove.x -= 1.0f;
-            if (IsKeyDown(KEY_D)) localMove.x += 1.0f;
-            if (IsKeyDown(KEY_SPACE))  localMove.y += 1.0f;
-            if (IsKeyDown(KEY_LEFT_SHIFT)) localMove.y -= 1.0f;
-
-            if (Vector3LengthSqr(localMove) != 0.0f)
-            {
-                Vector3 worldMove = Vector3RotateByQuaternion(Vector3Normalize(localMove), cam.rotation);
-                cam.position = Vector3Add(cam.position, Vector3Scale(worldMove, MOVE_SPEED * dt));
-            }
-
-            if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
-            {
-                Vector2 md = GetMouseDelta();
-                yaw   += -md.x * LOOK_SPEED;
-                pitch += -md.y * LOOK_SPEED;
-
-                // clamp pitch so you can't flip upside down
-                pitch = Clamp(pitch, -89.9f, 89.9f);
-
-                Quaternion qPitch = QuaternionFromEuler(pitch * DEG2RAD, 0, 0);
-                Quaternion qYaw   = QuaternionFromEuler(0, yaw * DEG2RAD, 0);
-
-                cam.rotation = QuaternionNormalize(QuaternionMultiply(qYaw, qPitch));
-            }
-        }
 
 
         float time = 0;
+
+        //sky::Model model("test_3.obj", MatrixTranslate(0.f, 0.f, -2.f));
+        //sky::Model model("assets/test.obj", MatrixTranslate(0.f, 0.f, -2.f));
+        //sky::Model ocean_model("assets/ocean.obj", MatrixTranslate(0.f, 0.f, 0.f));
+        //sky::Model cube("cube.obj", MatrixTranslate(0.f, 0.f, 0.f));
+
+        sky::Model smooth_suzanne("assets/test_smooth.obj", MatrixTranslate(0.f, 0.f, -2.f));
+        sky::Model highpoly_suzanne("assets/test_3.obj", MatrixTranslate(0.f, 0.f, -2.f));
 
         void draw()
 		{
@@ -178,30 +174,63 @@ namespace sky
             {
                 softwareRenderBuffer.clear();
                 std::chrono::duration<double> passed = (std::chrono::high_resolution_clock::now() - sky::time::startTime);
-                model.set_transform(MatrixTranslate(0.f, sin(passed.count() * 1.f), 2.f));
 
-                for (int z = 0; z < 1; ++z)
+                switch (scene::id)
                 {
-                    for (int y = 0; y < 1; ++y)
-                    {
-                        for (int x = 0; x < 1; ++x)
+                    default:
+                    case 0:
+
+                        for (int z = 0; z < 3; ++z)
                         {
-                            model.set_transform(MatrixMultiply(
-                                                               MatrixRotateXYZ(
-                                                                Vector3Scale(
-                                                                        Vector3{1.f, 1.f, 1.f},
-                                                                        sin(passed.count() + x + y + z))), MatrixTranslate((x - 0) * 4, y * 4, z * -4)));
+                            for (int y = 0; y < 3; ++y)
+                            {
+                                for (int x = 0; x < 3; ++x)
+                                {
+                                    smooth_suzanne.set_transform(MatrixMultiply(
+                                            MatrixRotateXYZ(
+                                                    Vector3Scale(
+                                                            Vector3{1.f, 1.f, 1.f},
+                                                            sin(passed.count() + x + y + z))),
 
-                            //softwareRenderBuffer.draw_model(cam, model, sky::shade_rim);
-                            softwareRenderBuffer.draw_model(cam, model, sky::shade_half_lambert);
+                                            MatrixTranslate((x - 1) * 4, (y - 1) * 4, (z + 2) * -4)));
+
+                                    softwareRenderBuffer.draw_model_flat(scene::cam, smooth_suzanne, sky::shade_rim);
+                                }
+                            }
                         }
-                    }
-                }
 
+                        break;
+
+                    case 1:
+                        highpoly_suzanne.set_transform(MatrixTranslate(0.f, 0.f, -2.f));
+                        softwareRenderBuffer.draw_model_flat(scene::cam, smooth_suzanne, sky::shade_half_lambert);
+                        break;
+
+                    case 2:
+                        highpoly_suzanne.set_transform(MatrixMultiply(MatrixRotateXYZ({0.f, sinf(passed.count() * 1.f), 0.f}), MatrixTranslate(0.f, 0.f, -2.f)));
+                        softwareRenderBuffer.draw_model_gouraud(scene::cam, highpoly_suzanne, sky::shade_half_lambert);
+                        break;
+                }
+                if (false)
                 {
                     //softwareRenderBuffer.draw_model(cam, ocean_model);
-                    // softwareRenderBuffer.draw_model_multithreaded(cam, model);
+
+                    //model.set_transform(MatrixTranslate(0.f, sin(passed.count() * 1.f), -2.f));
+                    //softwareRenderBuffer.draw_model_flat(scene::cam, model);
+
+                    //smooth_model.set_transform(MatrixTranslate(2.f, sin(passed.count() * 0.9f), -2.f));
+                    //softwareRenderBuffer.draw_model(scene::cam, smooth_model);
+
+                    //smooth_model.set_transform(MatrixTranslate(-2.f, sin(passed.count() * 0.9f), -2.f));
+                    //softwareRenderBuffer.draw_model_gouraud(scene::cam, smooth_model);
                 }
+
+                ///*
+                //*/
+
+                //softwareRenderBuffer.blit_depthbuffer();
+                //softwareRenderBuffer.apply_depth_blur(2.f, 1);
+                softwareRenderBuffer.apply_glow();
 
 
                 // Update and draw tex
@@ -212,7 +241,9 @@ namespace sky
 
             // Begin screen blit
             BeginDrawing();
-            ClearBackground(BLACK); // or whatever background
+
+            // ClearBackground(BLACK); we don't actually need this ...
+
             DrawTexturePro(
                     bufferPtr->texture,
                     { 0, 0, (float)pixelWidth, -(float)pixelHeight },// (flip Y)
@@ -221,25 +252,22 @@ namespace sky
                     0.0f,
                     WHITE
             );
-            DrawText(std::to_string(sky::time::lerpFps).c_str(), 20, 20, 20, WHITE);
+
+            DrawTextEx(main_font, scene::names[scene::id].c_str(), (Vector2){ 20, 15 }, (float)main_font.baseSize, 0, WHITE);
+            DrawTextEx(main_font, (std::to_string(int(1 / GetFrameTime())) + " fps").c_str(), (Vector2){ 20, 40 }, (float)main_font.baseSize, 0, WHITE);
             EndDrawing();
 		}
 	}
 
 	void init()
 	{
-		// Init debug
-		dbg::init();
-		// in::init(); TODO: fix input
 		render::init();
         time::init();
-
 
         while (!render::windowPtr->ShouldClose())
         {
             time::tick();
-            render::handle_input((float)sky::time::deltaTime.count());
-            // scene::step(time::deltaTime);
+            input::handle((float)sky::time::deltaTime.count());
             render::draw();
         }
 	}

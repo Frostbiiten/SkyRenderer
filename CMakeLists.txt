@@ -7,9 +7,6 @@ set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
 set(FETCHCONTENT_QUIET FALSE)
 
-include(cmake/FindFmt.cmake)
-include(cmake/FindSpdlog.cmake)
-include(cmake/FindPhysFS.cmake)
 include(cmake/FindRaylib.cmake)
 include(cmake/FindSIMDE.cmake)
 
@@ -29,8 +26,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${PROJECT_INCLUDE})
 
 # link libs
 target_link_libraries(${PROJECT_NAME} PRIVATE raylib raylib_cpp) # raylib + wrapper
-target_link_libraries(${PROJECT_NAME} PRIVATE fmt spdlog) # fmt + spdlog
-target_link_libraries(${PROJECT_NAME} PRIVATE physfs-static) # physfs
 target_include_directories(${PROJECT_NAME} PRIVATE ${simde_SOURCE_DIR}) #simde
 
 if (APPLE)
@@ -41,9 +36,28 @@ endif()
 
 # Web Configurations
 if (${PLATFORM} STREQUAL "Web")
-    # Tell Emscripten to build an example.html file.
     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
 
-    # Required linker flags for using Raylib with Emscripten
-    target_link_options(${PROJECT_NAME} PRIVATE -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sEXPORTED_RUNTIME_METHODS=ccall -sUSE_GLFW=3)
+    target_link_options(${PROJECT_NAME} PRIVATE
+            "--preload-file=assets"
+            "-sEXPORTED_FUNCTIONS=['_main','_malloc']"
+            "-sEXPORTED_RUNTIME_METHODS=['ccall']"
+            "-sUSE_GLFW=3"
+            "-sALLOW_MEMORY_GROWTH=1"
+            "-sINITIAL_MEMORY=64MB"
+            "-sMAXIMUM_MEMORY=512MB"
+            "-sASYNCIFY"
+            "-O3"
+            "-msimd128"
+            "-sWASM_BIGINT=1"
+            "--closure=1"
+            "-sASSERTIONS=0"
+    )
+
+    target_compile_options(${PROJECT_NAME} PRIVATE
+            "-O3"
+            "-msimd128"
+            "-ffast-math"
+            "-flto"
+    )
 endif()
