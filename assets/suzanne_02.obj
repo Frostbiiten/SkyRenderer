@@ -1,6 +1,6 @@
 # Blender 4.3.2
 # www.blender.org
-mtllib test_2_smooth.mtl
+mtllib suzanne_02.mtl
 o Suzanne
 v 0.439019 0.159939 0.756944
 v -0.439019 0.159939 0.756944

@@ -34,7 +34,26 @@ if (APPLE)
     target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
 endif()
 
-# Web Configurations
+include(CheckIPOSupported)
+check_ipo_supported(RESULT result)
+
+if(result)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+    message(STATUS "Link Time Optimization (LTO) enabled.")
+else()
+    message(WARNING "Link Time Optimization (LTO) is not supported by the compiler.")
+endif()
+
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+
+if(COMPILER_SUPPORTS_MARCH_NATIVE)
+    add_compile_options("-march=native")
+    message(STATUS "Enabled native architecture optimizations (-march=native).")
+else()
+    message(WARNING "The compiler does not support -march=native.")
+endif()
+
 if (${PLATFORM} STREQUAL "Web")
     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
 
@@ -60,4 +79,24 @@ if (${PLATFORM} STREQUAL "Web")
             "-ffast-math"
             "-flto"
     )
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE
+            "-O3"
+            "-ffast-math"
+            "-flto"
+    )
+
+    include(CheckIPOSupported)
+    check_ipo_supported(RESULT ipo_supported)
+    if(ipo_supported)
+        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+        message(STATUS "Link Time Optimization (LTO) will be enabled for Release builds.")
+    endif()
+
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
+    if(COMPILER_SUPPORTS_MARCH_NATIVE)
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
+        message(STATUS "Native architecture optimizations (-march=native) will be enabled for Release builds.")
+    endif()
 endif()

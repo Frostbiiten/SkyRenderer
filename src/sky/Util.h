@@ -55,6 +55,19 @@ namespace sky
                     (float)(color & 0xFF)
             };
         }
+
+        inline float srgb_to_lin(float c)
+        {
+            return (c <= 0.04045f) ? c * (1.0f / 12.92f)
+                                   : std::pow((c + 0.055f) * (1.0f / 1.055f), 2.4f);
+        }
+
+        inline float lin_to_srgb(float c)
+        {
+            c = std::clamp(c, 0.0f, 1.0f);
+            return (c <= 0.0031308f) ? c * 12.92f
+                                     : 1.055f * std::pow(c, 1.0f / 2.4f) - 0.055f;
+        }
     }
 
     // SIMD optimized Vector normalization

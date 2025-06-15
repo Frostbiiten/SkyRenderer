@@ -63,6 +63,7 @@ namespace sky {
 
         std::vector<Vector3> modelTransformedVerts;
         std::vector<Vector3> modelTransformedNormals;
+        std::vector<std::uint32_t> framebuffer;
         std::vector<Vector3> camVerts;
 
     public:
@@ -72,11 +73,8 @@ namespace sky {
         void draw_model_flat(const Camera& camera, const Model& model, ShadeFunc shader = shade_half_lambert);
         void draw_model_gouraud(const Camera &camera, const Model &model, ShadeFunc shader = shade_half_lambert);
 
-        std::vector<std::uint32_t> framebuffer;
-
+        std::vector<std::uint32_t>& get_frame();
         void blit_depthbuffer();
         void clear();
-
-        void apply_depth_blur(float radius, float depth_threshold) { return; };
     };
 }

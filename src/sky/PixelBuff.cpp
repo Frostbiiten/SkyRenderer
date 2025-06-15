@@ -540,11 +540,13 @@ namespace sky
                         float r = dot4(bc, c_r);
                         float g = dot4(bc, c_g);
                         float b = dot4(bc, c_b);
-                        //framebuffer[idx] = color::pack(r, g, b);
-                        set(idx, color::pack(r, g, b));
+                        set(idx, color::pack(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b)));
 #else
-                        //framebuffer[idx] = color::pack(b0 * c1.x + b1 * c2.x + b2 * c3.x, b0 * c1.y + b1 * c2.y + b2 * c3.y, b0 * c1.z + b1 * c2.z + b2 * c3.z);
-                        set(idx, color::pack(b0 * c1.x + b1 * c2.x + b2 * c3.x, b0 * c1.y + b1 * c2.y + b2 * c3.y, b0 * c1.z + b1 * c2.z + b2 * c3.z);
+                    set(idx, color::pack(
+                        static_cast<uint8_t>(b0 * c1.x + b1 * c2.x + b2 * c3.x),
+                        static_cast<uint8_t>(b0 * c1.y + b1 * c2.y + b2 * c3.y),
+                        static_cast<uint8_t>(b0 * c1.z + b1 * c2.z + b2 * c3.z))
+                    );
 #endif
                     }
                 }
@@ -606,7 +608,12 @@ namespace sky
                 const Vector3& world_normal = modelTransformedNormals[cur_face.vertices[i].vn];
                 Vector3 viewDir = Vector3Normalize(Vector3Subtract(camera.position, world_pos));
                 uint32_t packed_color = shader(world_normal, viewDir, kDefaultLightDir);
-                face_vertex_colors[i] = color::unpack_vec3(packed_color);
+
+                face_vertex_colors[i] = {
+                        (float)(packed_color & 0xFF),
+                        (float)((packed_color >> 8) & 0xFF),
+                        (float)((packed_color >> 16) & 0xFF)
+                };
             }
 
             std::array<Vector3, 3> face_cam_verts = {
@@ -726,184 +733,16 @@ namespace sky
         }
     }
 
-
-    // for fun
-
-    /*
-    #include <simde/x86/avx2.h>
-    #include <numeric>
-    #include <cmath>
-    #include <cstdint>
-
-    static inline simde__m128 gather4f(const float* table, simde__m128i idx32)
-    {
-        alignas(16) int32_t i[4];
-        simde_mm_store_si128(reinterpret_cast<simde__m128i*>(i), idx32);
-        return simde_mm_set_ps(table[i[3]], table[i[2]], table[i[1]], table[i[0]]);
-    }
-
-    #if defined(SIMDE_X86_AVX2_NATIVE) || defined(SIMDE_X86_WASM_SIMD128_NATIVE)
-    #define GATHER_PS(tbl, idx) simde_mm_i32gather_ps((tbl), (idx), 4)
-    #else
-    #define GATHER_PS(tbl, idx) gather4f((tbl), (idx))
-    #endif
-
-    void PixelBuff::apply_depth_blur(float radius, float)
-    {
-        static constexpr std::array<Vector2, 12> taps = {{
-                                                                 {-0.326f,-0.406f},{-0.840f,-0.074f},{-0.696f, 0.457f},{-0.203f, 0.621f},
-                                                                 { 0.962f,-0.195f},{ 0.473f,-0.480f},{ 0.519f, 0.767f},{ 0.185f,-0.893f},
-                                                                 { 0.507f, 0.064f},{ 0.896f, 0.412f},{-0.322f,-0.933f},{-0.792f,-0.598f}
-                                                         }};
-
-        constexpr float kGamma     = 2.2f;
-        constexpr float kInvGamma  = 1.0f / kGamma;
-        constexpr int   kKernel    = 13;      // centre + 12 Poisson taps
-        constexpr int   kVecWidth  = 4;       // 4 pixels = 128-bit SIMD
-
-        // LUTs for correction
-        static float        sRGB2LinF[256];
-        static std::uint8_t Lin2SRGB8[4097];  // 12-bit linear to 8-bit sRGB
-        static bool lutBuilt = []{
-            for (int i = 0; i < 256; ++i)
-                sRGB2LinF[i] = std::pow(i / 255.0f, kGamma);
-
-            for (int i = 0; i <= 4096; ++i)
-                Lin2SRGB8[i] = static_cast<std::uint8_t>(
-                        std::pow(i / 4096.0f, kInvGamma) * 255.0f + 0.5f);
-            return true;
-        }();
-
-        // scale poisson offsets by radius
-        struct Offset { int dx, dy; };
-        Offset ofs[kKernel];
-        ofs[0] = {0, 0};
-        for (std::size_t i = 0; i < taps.size(); ++i) {
-            ofs[i + 1].dx = static_cast<int>(std::round(taps[i].x * radius));
-            ofs[i + 1].dy = static_cast<int>(std::round(taps[i].y * radius));
-        }
-        const float invSamples = 1.0f / kKernel;
-
-        // destination
-        std::vector<std::uint32_t> out(framebuffer.size());
-
-        // row indices
-        static std::vector<int> rows(HEIGHT);
-        if (rows[2] == 0) std::iota(rows.begin(), rows.end(), 0);
-
-        // worker
-        auto blur_row = [&](int y)
-        {
-            // 4px at a time
-            for (int x = 0; x <= WIDTH - kVecWidth; x += kVecWidth)
-            {
-                simde__m128 accR = simde_mm_setzero_ps();
-                simde__m128 accG = simde_mm_setzero_ps();
-                simde__m128 accB = simde_mm_setzero_ps();
-
-                for (const Offset& o : ofs)
-                {
-                    int sy = fast_clamp(y + o.dy, 0, HEIGHT - 1);
-                    int base = sy * WIDTH + (x + o.dx);
-
-                    std::uint32_t pix[4];
-                    for (int l = 0; l < kVecWidth; ++l)
-                    {
-                        int sx = fast_clamp((x + o.dx) + l, 0, WIDTH - 1);
-                        pix[l] = framebuffer[sy * WIDTH + sx];
-                    }
-                    simde__m128i pack = simde_mm_loadu_si128(
-                            reinterpret_cast<const simde__m128i*>(pix));
-
-                    simde__m128i r8 = simde_mm_and_si128(simde_mm_srli_epi32(pack,  0), simde_mm_set1_epi32(0xFF));
-                    simde__m128i g8 = simde_mm_and_si128(simde_mm_srli_epi32(pack,  8), simde_mm_set1_epi32(0xFF));
-                    simde__m128i b8 = simde_mm_and_si128(simde_mm_srli_epi32(pack, 16), simde_mm_set1_epi32(0xFF));
-
-                    accR = simde_mm_add_ps(accR, GATHER_PS(sRGB2LinF, r8));
-                    accG = simde_mm_add_ps(accG, GATHER_PS(sRGB2LinF, g8));
-                    accB = simde_mm_add_ps(accB, GATHER_PS(sRGB2LinF, b8));
-                }
-
-                // average
-                simde__m128 norm = simde_mm_set1_ps(invSamples);
-                accR = simde_mm_mul_ps(accR, norm);
-                accG = simde_mm_mul_ps(accG, norm);
-                accB = simde_mm_mul_ps(accB, norm);
-
-                float rF[4], gF[4], bF[4];
-                simde_mm_storeu_ps(rF, accR);
-                simde_mm_storeu_ps(gF, accG);
-                simde_mm_storeu_ps(bF, accB);
-
-                for (int l = 0; l < kVecWidth; ++l)
-                {
-                    auto encode = [&](float lin) -> std::uint8_t {
-                        int idx = static_cast<int>(lin * 4096.0f + 0.5f);
-                        idx = std::clamp(idx, 0, 4096);
-                        return Lin2SRGB8[idx];
-                    };
-
-                    std::uint8_t r8 = encode(rF[l]);
-                    std::uint8_t g8 = encode(gF[l]);
-                    std::uint8_t b8 = encode(bF[l]);
-
-                    out[y * WIDTH + (x + l)] =
-                            static_cast<std::uint32_t>(r8)
-                            | (static_cast<std::uint32_t>(g8) <<  8)
-                            | (static_cast<std::uint32_t>(b8) << 16)
-                            | 0xFF000000u;   // alpha = 255
-                }
-            }
-
-            for (int x = (WIDTH & ~3); x < WIDTH; ++x)
-            {
-                float rAcc = 0.0f, gAcc = 0.0f, bAcc = 0.0f;
-
-                for (const Offset& o : ofs)
-                {
-                    int sx = std::clamp(x + o.dx, 0, WIDTH  - 1);
-                    int sy = std::clamp(y + o.dy, 0, HEIGHT - 1);
-                    std::uint32_t c = framebuffer[sy * WIDTH + sx];
-
-                    rAcc += sRGB2LinF[(c      ) & 0xFF];       // R
-                    gAcc += sRGB2LinF[(c >>  8) & 0xFF];       // G
-                    bAcc += sRGB2LinF[(c >> 16) & 0xFF];       // B
-                }
-                rAcc *= invSamples;
-                gAcc *= invSamples;
-                bAcc *= invSamples;
-
-                auto encode = [&](float lin) -> std::uint8_t {
-                    int idx = static_cast<int>(lin * 4096.0f + 0.5f);
-                    idx = std::clamp(idx, 0, 4096);
-                    return Lin2SRGB8[idx];
-                };
-
-                std::uint8_t r8 = encode(rAcc);
-                std::uint8_t g8 = encode(gAcc);
-                std::uint8_t b8 = encode(bAcc);
-
-                out[y * WIDTH + x] =
-                        static_cast<std::uint32_t>(r8)
-                        | (static_cast<std::uint32_t>(g8) <<  8)
-                        | (static_cast<std::uint32_t>(b8) << 16)
-                        | 0xFF000000u;
-            }
-        };
-
-        std::for_each(std::execution::par_unseq, rows.begin(), rows.end(), blur_row);
-
-        framebuffer.swap(out);
-    }
-
-    */
-
-    // fast screen buffer clears
+    // clears screen buffers for redrawing
     void PixelBuff::clear()
     {
         std::memset(depthbuffer.data(), 0xFF, depthbuffer.size() * sizeof(std::uint32_t));
         //std::memset(framebuffer.data(), 0, framebuffer.size() * sizeof(std::uint32_t));
-        constexpr auto backdrop = color::pack(kAmbientColor.r / 3, kAmbientColor.g / 3, kAmbientColor.b / 3);
+        constexpr auto backdrop = color::pack(kAmbientColor.r / 3, kAmbientColor.g / 3, kAmbientColor.b / 3); // make backdrop a bit darker
         std::fill(framebuffer.begin(), framebuffer.end(), backdrop);
+    }
+
+    std::vector<std::uint32_t> &PixelBuff::get_frame() {
+        return framebuffer;
     }
 }
