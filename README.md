@@ -2,7 +2,8 @@
 
 A cross-platform C++20 software renderer supporting flat, gouraud and per-pixel shading.
 Supports optional SIMD acceleration via [SIMDe](https://github.com/simd-everywhere/simde).
-Although [Raylib](https://github.com/raysan5/raylib) is only used for cross-platform display, it is mainly used for input and display. All rendering is essentially done on an ARGB pixel vector and displayed to the screen by copying to a Raylib RenderTexture. A demo is available at 
+Although [Raylib](https://github.com/raysan5/raylib) is only used for cross-platform display, it is mainly used for input and display. All rendering is essentially done on an ARGB pixel vector and displayed to the screen by copying to a Raylib RenderTexture.
+A [demo](https://www.edem.ca/projects/SkyRenderer) is available.
 
 |  |  |
 |----------|----------|
