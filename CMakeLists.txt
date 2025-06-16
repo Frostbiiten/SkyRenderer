@@ -54,7 +54,7 @@ else()
     message(WARNING "The compiler does not support -march=native.")
 endif()
 
-if (${PLATFORM} STREQUAL "Web")
+if (DEFINED PLATFORM AND ${PLATFORM} STREQUAL "Web")
     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
 
     target_link_options(${PROJECT_NAME} PRIVATE
