@@ -54,6 +54,7 @@ else()
     message(WARNING "The compiler does not support -march=native.")
 endif()
 
+
 if (DEFINED PLATFORM AND PLATFORM STREQUAL "Web")
     set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".html")
 
@@ -85,6 +86,19 @@ else()
             "-ffast-math"
             "-flto"
     )
+
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+		target_compile_options(${PROJECT_NAME} PRIVATE
+			$<$<CONFIG:Release>:/O2>
+			$<$<CONFIG:Release>:/GL>
+			$<$<CONFIG:Release>:/fp:fast>
+		)
+
+		target_link_options(${PROJECT_NAME} PRIVATE
+			$<$<CONFIG:Release>:/LTCG>
+		)
+	endif()
+
 endif()
 
 add_custom_command(
