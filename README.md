@@ -1,4 +1,4 @@
-# SkyRenderer
+# 🌨️ SkyRenderer
 
 A cross-platform C++20 software renderer supporting flat, gouraud and per-pixel shading.
 Supports optional SIMD acceleration via SIMDe [SIMDe](https://github.com/simd-everywhere/simde).
@@ -18,7 +18,7 @@ Although [Raylib](https://github.com/raysan5/raylib) is only used for cross-plat
 
 ## Building
 
-#### CMake + Ninja
+#### CMake + Ninja (recommended)
 ```
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
@@ -41,3 +41,9 @@ cd build-web
 python -m http.server 8080
 ```
 Then, visit `http://localhost:8080/SkyRenderer.html`
+
+In the future, I am planning to ...
+- Implement uv texture sampling
+- Add skybox support (panoramic, cubemap, etc)
+- Further improve performance, fully taking advantage of memory locality and parallelism. This may require large rewrites.
+- Perhaps switch to fixed-point maths (?)
