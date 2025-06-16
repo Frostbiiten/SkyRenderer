@@ -26,6 +26,7 @@ CMakeLists.txt.user
 *.iml
 *.iws
 
+.idea/
 .clion/
 *.user
 *.user.*
