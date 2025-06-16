@@ -112,6 +112,17 @@ namespace sky
 
         float inv_area = 1.0f / area;
 
+#ifdef PIXELBUFF_ENABLE_SIMD
+        simde__m128 pz   = simde_mm_set_ps(0.0f, p3.z, p2.z, p1.z);
+        simde__m128 n0   = pack_vec3(a1.world_normal);
+        simde__m128 n1   = pack_vec3(a2.world_normal);
+        simde__m128 n2   = pack_vec3(a3.world_normal);
+        simde__m128 pos0 = pack_vec3(a1.world_pos);
+        simde__m128 pos1 = pack_vec3(a2.world_pos);
+        simde__m128 pos2 = pack_vec3(a3.world_pos);
+#endif
+
+
         for (int y = min_y; y <= max_y; ++y)
         {
             float w0 = w0_row;
@@ -139,11 +150,6 @@ namespace sky
 #ifdef PIXELBUFF_ENABLE_SIMD
                         simde__m128 bc = simde_mm_set_ps(0.0f, b2, b1, b0);
 
-                        auto pack_vec3 = [](const Vector3& v) -> simde__m128
-                        {
-                            return simde_mm_set_ps(0.0f, v.z, v.y, v.x);
-                        };
-
                         simde__m128 n0 = pack_vec3(a1.world_normal);
                         simde__m128 n1 = pack_vec3(a2.world_normal);
                         simde__m128 n2 = pack_vec3(a3.world_normal);
@@ -166,16 +172,7 @@ namespace sky
                                 simde_mm_mul_ps(pos2, simde_mm_shuffle_ps(bc, bc, 0xAA))
                         );
 
-                        auto unpack_vec3 = [](simde__m128 v) -> Vector3
-                        {
-                            return {
-                                    simde_mm_cvtss_f32(v),
-                                    simde_mm_cvtss_f32(simde_mm_shuffle_ps(v, v, 0x55)),
-                                    simde_mm_cvtss_f32(simde_mm_shuffle_ps(v, v, 0xAA))
-                            };
-                        };
-
-                        Vector3 normal = Vector3Normalize(unpack_vec3(interp_n));
+                        Vector3 normal = Vector3NormalizeFast(unpack_vec3(interp_n));
                         Vector3 world_pos = unpack_vec3(interp_p);
 #else
                         Vector3 world_pos = Vector3Add(Vector3Add(
@@ -183,12 +180,12 @@ namespace sky
                             Vector3Scale(a2.world_pos, b1)),
                                                        Vector3Scale(a3.world_pos, b2));
 
-                        Vector3 normal = Vector3Normalize(Vector3Add(Vector3Add(
+                        Vector3 normal = Vector3NormalizeFast(Vector3Add(Vector3Add(
                             Vector3Scale(a1.world_normal, b0),
                             Vector3Scale(a2.world_normal, b1)),
                             Vector3Scale(a3.world_normal, b2)));
 #endif
-                        Vector3 view_dir = Vector3Normalize(Vector3Subtract(camera.position, world_pos));
+                        Vector3 view_dir = Vector3NormalizeFast(Vector3Subtract(camera.position, world_pos));
                         uint32_t color = shader(normal, view_dir, LIGHT_DIR);
                         set(idx, color);
                     }
@@ -226,7 +223,7 @@ namespace sky
         {
             Vector4 n = { normals[i].x, normals[i].y, normals[i].z, 0.0f };
             Vector4 tn = Vector4Transform(n, normal_matrix);
-            model_transformed_normals[i] = Vector3Normalize({tn.x, tn.y, tn.z });
+            model_transformed_normals[i] = Vector3NormalizeFast({tn.x, tn.y, tn.z });
         }
 
         cam_verts.resize(verts.size());
@@ -407,12 +404,12 @@ namespace sky
             Vector3 w1 = model_transformed_verts[f.vertices[1].v];
             Vector3 w2 = model_transformed_verts[f.vertices[2].v];
 
-            Vector3 n = Vector3Normalize(Vector3CrossProduct(Vector3Subtract(w1, w0),
+            Vector3 n = Vector3NormalizeFast(Vector3CrossProduct(Vector3Subtract(w1, w0),
                                                              Vector3Subtract(w2, w0)));
             Vector3 c = { (w0.x + w1.x + w2.x) / 3.0f,
                           (w0.y + w1.y + w2.y) / 3.0f,
                           (w0.z + w1.z + w2.z) / 3.0f };
-            Vector3 view_dir = Vector3Normalize(Vector3Subtract(camera.position, c));
+            Vector3 view_dir = Vector3NormalizeFast(Vector3Subtract(camera.position, c));
             std::uint32_t face_col = shader(n, view_dir, LIGHT_DIR);
 
             Vector3 cv0 = cam_verts[f.vertices[0].v];
@@ -571,7 +568,7 @@ namespace sky
         {
             Vector4 n = { normals[i].x, normals[i].y, normals[i].z, 0.0f };
             Vector4 tn = Vector4Transform(n, normal_matrix);
-            model_transformed_normals[i] = Vector3Normalize({tn.x, tn.y, tn.z });
+            model_transformed_normals[i] = Vector3NormalizeFast({tn.x, tn.y, tn.z });
         }
 
         for (size_t i = 0; i < verts.size(); ++i)
@@ -599,7 +596,7 @@ namespace sky
             {
                 const Vector3& world_pos = model_transformed_verts[cur_face.vertices[i].v];
                 const Vector3& world_normal = model_transformed_normals[cur_face.vertices[i].vn];
-                Vector3 viewDir = Vector3Normalize(Vector3Subtract(camera.position, world_pos));
+                Vector3 viewDir = Vector3NormalizeFast(Vector3Subtract(camera.position, world_pos));
                 uint32_t packed_color = shader(world_normal, viewDir, LIGHT_DIR);
 
                 face_vertex_colors[i] = {

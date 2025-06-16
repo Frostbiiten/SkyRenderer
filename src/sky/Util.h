@@ -97,6 +97,20 @@ namespace sky
         return simde_mm_cvtss_f32(sum2);
     }
 
+    inline simde__m128 pack_vec3(const Vector3& v)
+    {
+        return simde_mm_set_ps(0.0f, v.z, v.y, v.x); // x, y, z, 0
+    }
+
+    inline Vector3 unpack_vec3(simde__m128 v)
+    {
+        return {
+            simde_mm_cvtss_f32(v),
+            simde_mm_cvtss_f32(simde_mm_shuffle_ps(v, v, 0x55)),
+            simde_mm_cvtss_f32(simde_mm_shuffle_ps(v, v, 0xAA))
+        };
+    }
+
     inline Vector4 Vector4Transform(const Vector4& v, const Matrix& m)
     {
         simde__m128 vec = simde_mm_set_ps(v.w, v.z, v.y, v.x); // reversed order

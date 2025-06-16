@@ -103,7 +103,7 @@ namespace sky
             // check if there's actually any movement
             if (Vector3LengthSqr(local_move) != 0.0f)
             {
-                Vector3 worldMove = Vector3RotateByQuaternion(Vector3Normalize(local_move), scene::cam.rotation);
+                Vector3 worldMove = Vector3RotateByQuaternion(Vector3NormalizeFast(local_move), scene::cam.rotation);
                 scene::cam.position = Vector3Add(scene::cam.position, Vector3Scale(worldMove, scene::MOVE_SPEED * dt));
             }
 
