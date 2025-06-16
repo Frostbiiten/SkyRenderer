@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
 
-project(RaylibTest)
+project(SkyRenderer)
 set(CMAKE_CXX_STANDARD 20)
 
 # Dependencies
@@ -85,18 +85,12 @@ else()
             "-ffast-math"
             "-flto"
     )
-
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT ipo_supported)
-    if(ipo_supported)
-        set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
-        message(STATUS "Link Time Optimization (LTO) will be enabled for Release builds.")
-    endif()
-
-    include(CheckCXXCompilerFlag)
-    check_cxx_compiler_flag("-march=native" COMPILER_SUPPORTS_MARCH_NATIVE)
-    if(COMPILER_SUPPORTS_MARCH_NATIVE)
-        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=native")
-        message(STATUS "Native architecture optimizations (-march=native) will be enabled for Release builds.")
-    endif()
 endif()
+
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_SOURCE_DIR}/assets"
+    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/assets"
+    COMMENT "Copying assets to build directory..."
+)

@@ -1,0 +1,41 @@
+# build directories
+cmake-build-debug/
+cmake-build-release/
+cmake-build-*/
+build/
+*/build/
+build-web/
+
+# object files, compiled libs
+*.o
+*.obj
+*.lo
+*.lib
+*.dll
+*.so
+*.dylib
+*.a
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+CMakeLists.txt.user
+.idea/
+*.iml
+*.iws
+
+.clion/
+*.user
+*.user.*
+.config/
+.vscode/
+.DS_Store
+Thumbs.db
+*.bak
+*.orig
+*~
+.#*
+*.swp
+*.swo

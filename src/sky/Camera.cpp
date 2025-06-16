@@ -11,9 +11,9 @@ namespace sky
 
     Matrix Camera::get_view_matrix() const
     {
-        Matrix invRot = MatrixInvert(QuaternionToMatrix(rotation));
-        Matrix invPos = MatrixTranslate(-position.x, -position.y, -position.z);
-        return MatrixMultiply(invPos, invRot);
+        Matrix inv_rot = MatrixInvert(QuaternionToMatrix(rotation));
+        Matrix inv_pos = MatrixTranslate(-position.x, -position.y, -position.z);
+        return MatrixMultiply(inv_pos, inv_rot);
     }
 
     float Camera::get_near_clip() const
@@ -26,8 +26,8 @@ namespace sky
         return far_clip;
     }
 
-    Matrix Camera::get_projection_matrix(int screenWidth, int screenHeight) const
+    Matrix Camera::get_projection_matrix(int screen_width, int screen_height) const
     {
-        return MatrixPerspective(fov * DEG2RAD, (float)screenWidth / screenHeight, near_clip, far_clip);
+        return MatrixPerspective(fov * DEG2RAD, (float)screen_width / screen_height, near_clip, far_clip);
     }
 }

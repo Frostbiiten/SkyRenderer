@@ -2,6 +2,7 @@
 #include <fstream>
 #include <cassert>
 #include <charconv>
+#include <string>
 
 // SKY
 #include <sky/Model.h>

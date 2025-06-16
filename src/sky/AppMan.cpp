@@ -15,20 +15,20 @@ namespace sky
 {
 	namespace time
 	{
-        std::chrono::time_point<std::chrono::high_resolution_clock> prevFrameTime;
-        std::chrono::time_point<std::chrono::high_resolution_clock> startTime;
-        std::chrono::duration<double> deltaTime;
+        std::chrono::time_point<std::chrono::high_resolution_clock> prev_frame_time;
+        std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
+        std::chrono::duration<double> delta_time;
 
         void init()
         {
-            startTime = std::chrono::high_resolution_clock::now();
+            start_time = std::chrono::high_resolution_clock::now();
         }
 
 		void tick()
 		{
             auto t = std::chrono::high_resolution_clock::now();
-			deltaTime = (t - prevFrameTime);
-            prevFrameTime = t;
+            delta_time = (t - prev_frame_time);
+            prev_frame_time = t;
 		}
 	}
 
@@ -41,8 +41,8 @@ namespace sky
         float pitch = 0;
         float yaw = 0;
 
-        int id = 0;
-        std::array<std::pair<std::string, int>, 7> names
+        int id = 0; // current scene index loaded
+        std::array<std::pair<std::string, int>, 7> scene_info
         {{
 
             {"rim-lighting", 4},
@@ -54,6 +54,7 @@ namespace sky
             {"clipping test", 1}
         }};
 
+        // shading modes
         int shading = 0;
         std::array<std::pair<sky::ShadeFunc, std::string>, 5> shading_models
         {{
@@ -71,44 +72,49 @@ namespace sky
     {
         void handle(float dt)
         {
-            Vector3 localMove = { 0, 0, 0 };
-
+            // Toggle z-buff view
             if (IsKeyPressed(KEY_I))
             {
                 scene::blit_depth = !scene::blit_depth;
             }
 
+            // Increment scene
             if (IsKeyPressed(KEY_O))
             {
-                scene::id = (scene::id + 1) % scene::names.size();
-                scene::shading = scene::names[scene::id].second;
+                scene::id = (scene::id + 1) % scene::scene_info.size();
+                scene::shading = scene::scene_info[scene::id].second;
             }
 
+            // Increment shading model
             if (IsKeyPressed(KEY_P))
             {
                 scene::shading = (scene::shading + 1) % scene::shading_models.size();
             }
 
-            if (IsKeyDown(KEY_W)) localMove.z -= 1.0f;
-            if (IsKeyDown(KEY_S)) localMove.z += 1.0f;
-            if (IsKeyDown(KEY_A)) localMove.x -= 1.0f;
-            if (IsKeyDown(KEY_D)) localMove.x += 1.0f;
-            if (IsKeyDown(KEY_SPACE))  localMove.y += 1.0f;
-            if (IsKeyDown(KEY_LEFT_SHIFT)) localMove.y -= 1.0f;
+            // local-movement
+            Vector3 local_move {0, 0, 0 };
+            if (IsKeyDown(KEY_W)) local_move.z -= 1.0f;
+            if (IsKeyDown(KEY_S)) local_move.z += 1.0f;
+            if (IsKeyDown(KEY_A)) local_move.x -= 1.0f;
+            if (IsKeyDown(KEY_D)) local_move.x += 1.0f;
+            if (IsKeyDown(KEY_SPACE)) local_move.y += 1.0f;
+            if (IsKeyDown(KEY_LEFT_SHIFT)) local_move.y -= 1.0f;
 
-            if (Vector3LengthSqr(localMove) != 0.0f)
+            // check if there's actually any movement
+            if (Vector3LengthSqr(local_move) != 0.0f)
             {
-                Vector3 worldMove = Vector3RotateByQuaternion(Vector3Normalize(localMove), scene::cam.rotation);
+                Vector3 worldMove = Vector3RotateByQuaternion(Vector3Normalize(local_move), scene::cam.rotation);
                 scene::cam.position = Vector3Add(scene::cam.position, Vector3Scale(worldMove, scene::MOVE_SPEED * dt));
             }
 
+            // lookaround
             if (IsMouseButtonDown(MOUSE_RIGHT_BUTTON))
             {
                 Vector2 md = GetMouseDelta();
                 scene::yaw   += -md.x * scene::LOOK_SPEED;
                 scene::pitch += -md.y * scene::LOOK_SPEED;
 
-                // prevent flipping upside down
+                // prevent camera going crazy at poles
                 scene::pitch = Clamp(scene::pitch, -89.9f, 89.9f);
 
                 Quaternion qPitch = QuaternionFromEuler(scene::pitch * DEG2RAD, 0, 0);
@@ -121,23 +127,23 @@ namespace sky
 
 	namespace render
 	{
-		std::unique_ptr<raylib::Window> windowPtr;
-        std::unique_ptr<raylib::RenderTexture2D> bufferPtr;
-        sky::PixelBuff softwareRenderBuffer(render::pixelWidth, render::pixelHeight);
-        Texture2D screenTexture;
+		std::unique_ptr<raylib::Window> window_ptr;
+        std::unique_ptr<raylib::RenderTexture2D> buffer_ptr;
+        sky::PixelBuff software_buff(render::PIXEL_WIDTH, render::PIXEL_HEIGHT);
+        Texture2D screen_tex;
         Font main_font;
 
         void init()
 		{
-			windowPtr = std::make_unique<raylib::Window>(pixelWidth * scaleFactor, pixelHeight * scaleFactor, "Sky", FLAG_WINDOW_ALWAYS_RUN);
-            bufferPtr = std::make_unique<raylib::RenderTexture2D>(pixelWidth, pixelHeight);
-            scene::shading = scene::names[scene::id].second;
+            window_ptr = std::make_unique<raylib::Window>(PIXEL_WIDTH * SCALE_FACTOR, PIXEL_HEIGHT * SCALE_FACTOR, "Sky", FLAG_WINDOW_ALWAYS_RUN);
+            buffer_ptr = std::make_unique<raylib::RenderTexture2D>(PIXEL_WIDTH, PIXEL_HEIGHT);
+            scene::shading = scene::scene_info[scene::id].second;
 
-            screenTexture = LoadTextureFromImage(
+            screen_tex = LoadTextureFromImage(
                     Image{
-                            .data = softwareRenderBuffer.get_frame().data(),
-                            .width = render::pixelWidth,
-                            .height = render::pixelHeight,
+                            .data = software_buff.get_frame().data(),
+                            .width = render::PIXEL_WIDTH,
+                            .height = render::PIXEL_HEIGHT,
                             .mipmaps = 1,
                             .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8
                     }
@@ -147,7 +153,7 @@ namespace sky
 		}
 
 
-        float time = 0;
+        // models and such
         sky::Model cube("assets/cube.obj", MatrixTranslate(0.f, 0.f, -2.f));
         sky::Model suzanne_01("assets/suzanne_01.obj", MatrixTranslate(0.f, 0.f, -2.f));
         sky::Model suzanne_02("assets/suzanne_02.obj", MatrixTranslate(0.f, 0.f, -2.f));
@@ -155,13 +161,11 @@ namespace sky
 
         void draw()
 		{
-            // Begin buffer draw
-            BeginTextureMode(*bufferPtr);
-            ClearBackground(raylib::Color::Black());
-
+            // begin buffer draw
+            BeginTextureMode(*buffer_ptr);
             {
-                softwareRenderBuffer.clear();
-                std::chrono::duration<double> passed = (std::chrono::high_resolution_clock::now() - sky::time::startTime);
+                software_buff.clear();
+                std::chrono::duration<double> passed = (std::chrono::high_resolution_clock::now() - sky::time::start_time);
 
                 switch (scene::id)
                 {
@@ -186,7 +190,7 @@ namespace sky
 
                                             MatrixTranslate((x - 1) * 4, (y - 1) * 4, (z + 2) * -4)));
 
-                                    softwareRenderBuffer.draw_model_flat(scene::cam, suzanne_01, scene::shading_models[scene::shading].first);
+                                    software_buff.draw_model_flat(scene::cam, suzanne_01, scene::shading_models[scene::shading].first);
                                 }
                             }
                         }
@@ -195,22 +199,22 @@ namespace sky
 
                     case 1:
                         suzanne_01.set_transform(MatrixMultiply(MatrixRotateXYZ({0.f, sinf(passed.count() * 1.f), 0.f}), MatrixTranslate(0.f, 0.f, -2.f)));
-                        softwareRenderBuffer.draw_model_flat(scene::cam, suzanne_01, scene::shading_models[scene::shading].first);
+                        software_buff.draw_model_flat(scene::cam, suzanne_01, scene::shading_models[scene::shading].first);
                         break;
 
                     case 2:
                         suzanne_03.set_transform(MatrixMultiply(MatrixRotateXYZ({0.f, sinf(passed.count() * 1.f), 0.f}), MatrixTranslate(0.f, 0.f, -2.f)));
-                        softwareRenderBuffer.draw_model_flat(scene::cam, suzanne_03, scene::shading_models[scene::shading].first);
+                        software_buff.draw_model_flat(scene::cam, suzanne_03, scene::shading_models[scene::shading].first);
                         break;
 
                     case 3:
                         suzanne_02.set_transform(MatrixMultiply(MatrixRotateXYZ({0.f, sinf(passed.count() * 1.f), 0.f}), MatrixTranslate(0.f, 0.f, -2.f)));
-                        softwareRenderBuffer.draw_model_gouraud(scene::cam, suzanne_02, scene::shading_models[scene::shading].first);
+                        software_buff.draw_model_gouraud(scene::cam, suzanne_02, scene::shading_models[scene::shading].first);
                         break;
 
                     case 4:
                         suzanne_02.set_transform(MatrixMultiply(MatrixRotateXYZ({0.f, sinf(passed.count() * 1.f), 0.f}), MatrixTranslate(0.f, 0.f, -2.f)));
-                        softwareRenderBuffer.draw_model(scene::cam, suzanne_02, scene::shading_models[scene::shading].first);
+                        software_buff.draw_model(scene::cam, suzanne_02, scene::shading_models[scene::shading].first);
                         break;
 
                     case 5:
@@ -226,7 +230,7 @@ namespace sky
                                             MatrixTranslate(v.x, v.y, v.z),
                                             MatrixTranslate((x - 4.5f) * 7, (y - 1) * 7, (z + 2) * -7)));
 
-                                    softwareRenderBuffer.draw_model_flat(scene::cam, cube, scene::shading_models[scene::shading].first);
+                                    software_buff.draw_model_flat(scene::cam, cube, scene::shading_models[scene::shading].first);
                                 }
                             }
                         }
@@ -252,7 +256,7 @@ namespace sky
 
                                                     MatrixTranslate((x - 0.5f) * 1, (y - 0.5f) * 1, (z + 2) * -1)));
 
-                                    softwareRenderBuffer.draw_model_flat(scene::cam, suzanne_01, scene::shading_models[scene::shading].first);
+                                    software_buff.draw_model_flat(scene::cam, suzanne_01, scene::shading_models[scene::shading].first);
                                 }
                             }
                         }
@@ -260,34 +264,31 @@ namespace sky
                         break;
                 }
 
-                if (scene::blit_depth) softwareRenderBuffer.blit_depthbuffer();
+                if (scene::blit_depth) software_buff.blit_depthbuffer();
 
                 // Update and draw tex
-                UpdateTexture(screenTexture, softwareRenderBuffer.get_frame().data());
-                DrawTextureEx(screenTexture, {0, 0}, 0.0f, 1, WHITE);
+                UpdateTexture(screen_tex, software_buff.get_frame().data());
+                DrawTextureEx(screen_tex, {0, 0}, 0.0f, 1, WHITE);
             }
             EndTextureMode();
 
-            // Begin screen blit
             BeginDrawing();
-
-            // ClearBackground(BLACK); we don't actually need this ... because the buffer covers it anyway
-
-            DrawTexturePro(
-                    bufferPtr->texture,
-                    { 0, 0, (float)pixelWidth, -(float)pixelHeight }, // flip Y
-                    { 0, 0, (float)pixelWidth * scaleFactor, (float)pixelHeight * scaleFactor },
-                    { 0, 0 },
-                    0.0f,
-                    WHITE
+            DrawTexturePro( // software buffer blit
+                buffer_ptr->texture,
+                {0, 0, (float)PIXEL_WIDTH, -(float)PIXEL_HEIGHT }, // flip Y
+                {0, 0, (float)PIXEL_WIDTH * SCALE_FACTOR, (float)PIXEL_HEIGHT * SCALE_FACTOR },
+                { 0, 0 },
+                0.0f,
+                WHITE
             );
 
-            DrawTextEx(main_font, scene::names[scene::id].first.c_str(), (Vector2){ 20, 15 }, (float)main_font.baseSize, 0, WHITE);
-            DrawTextEx(main_font, (std::to_string(int(1 / time::deltaTime.count())) + " fps").c_str(), (Vector2){ 20, 40 }, (float)main_font.baseSize, 0, WHITE);
+            // Draw scene text
+            DrawTextEx(main_font, scene::scene_info[scene::id].first.c_str(), Vector2 { 20, 15 }, (float)main_font.baseSize, 0, WHITE);
+            DrawTextEx(main_font, (std::to_string(int(1 / time::delta_time.count())) + " fps").c_str(), Vector2 { 20, 40 }, (float)main_font.baseSize, 0, WHITE);
 
             std::string txt = ("shading: " + scene::shading_models[scene::shading].second);
             txt += scene::blit_depth ? " (z-buffer)" : "";
-            DrawTextEx(main_font, txt.c_str(), (Vector2){ 20, render::pixelHeight * render::scaleFactor - 40 }, (float)main_font.baseSize, 0, WHITE);
+            DrawTextEx(main_font, txt.c_str(), Vector2 { 20, render::PIXEL_HEIGHT * render::SCALE_FACTOR - 40 }, (float)main_font.baseSize, 0, WHITE);
 
             EndDrawing();
 		}
@@ -298,10 +299,10 @@ namespace sky
 		render::init();
         time::init();
 
-        while (!render::windowPtr->ShouldClose())
+        while (!render::window_ptr->ShouldClose())
         {
             time::tick();
-            input::handle((float)sky::time::deltaTime.count());
+            input::handle((float)sky::time::delta_time.count());
             render::draw();
         }
 	}

@@ -26,16 +26,10 @@ namespace sky {
         Vector3 world_pos;
     };
 
-    struct GouraudVert
-    {
-        Vector3 colOverW;  // RGB * invW
-        float invW;        // 1 / clip.w
-    };
-
     class PixelBuff
     {
         int WIDTH, HEIGHT;
-        std::vector<std::uint32_t> depthbuffer; // now using fixed-point
+        std::vector<std::uint32_t> depth_buffer; // now using fixed-point
 
         inline void set(int x, int y, std::uint32_t color);
         inline void set(int idx, std::uint32_t color);
@@ -61,10 +55,13 @@ namespace sky {
                                       const Vector3 &c2,
                                       const Vector3 &c3);
 
-        std::vector<Vector3> modelTransformedVerts;
-        std::vector<Vector3> modelTransformedNormals;
-        std::vector<std::uint32_t> framebuffer;
-        std::vector<Vector3> camVerts;
+        inline Vector3 cam_to_screen(const Vector3 &camera_space_pos, const Matrix &projection_matrix) const;
+
+        std::vector<Vector3> model_transformed_verts;
+        std::vector<Vector3> model_transformed_normals;
+        std::vector<Vector3> cam_verts;
+
+        std::vector<std::uint32_t> frame_buffer;
 
     public:
         PixelBuff(int WIDTH, int HEIGHT);
@@ -76,5 +73,6 @@ namespace sky {
         std::vector<std::uint32_t>& get_frame();
         void blit_depthbuffer();
         void clear();
+
     };
 }

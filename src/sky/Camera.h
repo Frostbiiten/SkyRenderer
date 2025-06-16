@@ -20,6 +20,6 @@ namespace sky
         [[nodiscard]] Matrix get_view_matrix() const;
         [[nodiscard]] float get_near_clip() const;
         [[nodiscard]] float get_far_clip() const;
-        [[nodiscard]] Matrix get_projection_matrix(int screenWidth, int screenHeight) const;
+        [[nodiscard]] Matrix get_projection_matrix(int screen_width, int screenHeight) const;
     };
 }

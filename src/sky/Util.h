@@ -127,14 +127,14 @@ namespace sky
     }
 
     // [0, 1] mapped to [0, 2^24-1]
-    inline constexpr uint32_t DEPTH_SCALE = (1 << 24) - 1;
-    inline uint32_t float_to_fixed_depth(float z)
+    inline constexpr std::uint32_t DEPTH_SCALE = (1 << 24) - 1;
+    inline std::uint32_t float_to_fixed_depth(float z)
     {
         // z = fast_clamp(z, 0.0f, 1.0f); not really necessary...
-        return static_cast<uint32_t>(z * DEPTH_SCALE);
+        return static_cast<std::uint32_t>(z * DEPTH_SCALE);
     }
 
-    inline float fixed_to_float_depth(uint32_t d)
+    inline float fixed_to_float_depth(std::uint32_t d)
     {
         return float(d) / float(DEPTH_SCALE);
     }

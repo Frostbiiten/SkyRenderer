@@ -11,23 +11,23 @@ namespace sky
                                         const Vector3& viewDir,
                                         const Vector3& lightDir);
 
-    inline constexpr Vector3 kDefaultLightDir { 0.57735f, 0.57735f, -0.57735f };
-    inline constexpr Color   kAmbientColor    { 5, 12, 22, 255 };
+    inline constexpr Vector3 LIGHT_DIR {0.57735f, 0.57735f, -0.57735f };
+    inline constexpr Color   AMBIENT_COL    {5, 12, 22, 255 };
 
     inline std::uint32_t blend_with_ambient(float intensity)
     {
         auto clamp8 = [](int x) { return std::clamp(x, 0, 255); };
 
-        std::uint8_t r = clamp8(kAmbientColor.r + int(intensity * 255.0f));
-        std::uint8_t g = clamp8(kAmbientColor.g + int(intensity * 255.0f));
-        std::uint8_t b = clamp8(kAmbientColor.b + int(intensity * 255.0f));
+        std::uint8_t r = clamp8(AMBIENT_COL.r + int(intensity * 255.0f));
+        std::uint8_t g = clamp8(AMBIENT_COL.g + int(intensity * 255.0f));
+        std::uint8_t b = clamp8(AMBIENT_COL.b + int(intensity * 255.0f));
 
         return color::pack(r, g, b);
     }
 
     inline std::uint32_t shade_lambert(const Vector3& n,
                                        const Vector3& /*v*/,
-                                       const Vector3& l = kDefaultLightDir)
+                                       const Vector3& l = LIGHT_DIR)
     {
         float diff = std::max(0.0f, Vector3DotProduct(n, Vector3NormalizeFast(l)));
         return blend_with_ambient(diff);
@@ -35,7 +35,7 @@ namespace sky
 
     inline std::uint32_t shade_half_lambert(const Vector3& n,
                                             const Vector3& /*v*/,
-                                            const Vector3& l = kDefaultLightDir)
+                                            const Vector3& l = LIGHT_DIR)
     {
         float diff = Vector3DotProduct(n, Vector3NormalizeFast(l));
         diff = diff * 0.5f + 0.5f;
@@ -44,7 +44,7 @@ namespace sky
 
     inline std::uint32_t shade_toon(const Vector3& n,
                                     const Vector3&,
-                                    const Vector3& l = kDefaultLightDir)
+                                    const Vector3& l = LIGHT_DIR)
     {
         float diff = std::max(0.0f, Vector3DotProduct(n, Vector3NormalizeFast(l)));
         if      (diff > 0.80f) diff = 1.0f;
@@ -56,7 +56,7 @@ namespace sky
 
     inline std::uint32_t shade_phong(const Vector3& n,
                                      const Vector3& v,
-                                     const Vector3& l = kDefaultLightDir)
+                                     const Vector3& l = LIGHT_DIR)
     {
         Vector3 ln = Vector3NormalizeFast(l);
         float diff = std::max(0.0f, Vector3DotProduct(n, ln));
@@ -69,7 +69,7 @@ namespace sky
 
     inline std::uint32_t shade_rim(const Vector3& n,
                                    const Vector3& v,
-                                   const Vector3& l = kDefaultLightDir)
+                                   const Vector3& l = LIGHT_DIR)
     {
         float rim  = std::pow(fast_clamp(1.0f - std::fabs(Vector3DotProduct(n, v)), 0.0f, 1.0f), 3.0f);
         float diff = std::max(0.0f, Vector3DotProduct(n, Vector3NormalizeFast(l)));
@@ -78,9 +78,9 @@ namespace sky
         float g = fast_clamp((diff + rim * 0.4f), 0.f, 1.f);
         float b = fast_clamp((diff + rim * 1.0f), 0.f, 1.f);
 
-        std::uint8_t rf = std::clamp(int(kAmbientColor.r + r * 255.0f), 0, 255);
-        std::uint8_t gf = std::clamp(int(kAmbientColor.g + g * 255.0f), 0, 255);
-        std::uint8_t bf = std::clamp(int(kAmbientColor.b + b * 255.0f), 0, 255);
+        std::uint8_t rf = std::clamp(int(AMBIENT_COL.r + r * 255.0f), 0, 255);
+        std::uint8_t gf = std::clamp(int(AMBIENT_COL.g + g * 255.0f), 0, 255);
+        std::uint8_t bf = std::clamp(int(AMBIENT_COL.b + b * 255.0f), 0, 255);
 
         return color::pack(rf, gf, bf);
     }
